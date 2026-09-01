@@ -5,12 +5,15 @@ Task files are the source of truth. TASKS.md is a rendered index; fix drift by
 regenerating it, never by editing it.
 
 Usage:
-    python3 index.py                     regenerate, discovering stele/ upward from cwd
-    python3 index.py --root ./stele      point at a stele/ directory explicitly
-    python3 index.py --root ./stele --check   exit 1 if stale or invariants are broken
+    python3 index.py                          regenerate, finding stele/ upward from cwd
+    python3 index.py --root ./stele           point at a stele/ directory explicitly
+    python3 index.py --root ./stele --check   exit 1 on drift or a broken invariant
+
+Exit codes: the regenerate path exits 0 when it wrote successfully, reporting any problems
+as text. `--check` is the gate that exits non-zero - use it in CI.
 
 An accelerator, not a dependency: an agent that cannot locate this script maintains
-TASKS.md by hand from the shape described in SKILL.md.
+TASKS.md by hand from the shape documented in SKILL.md.
 """
 
 from __future__ import annotations
@@ -58,47 +61,73 @@ def find_root(explicit: str | None) -> Path | None:
     return None
 
 
-def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
-    """Flat `key: value` pairs from a leading --- block. Nested keys are ignored."""
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str, bool]:
+    """Flat `key: value` pairs from a leading --- block. Nested keys are ignored.
+
+    Returns (meta, body, malformed). `malformed` is True when there is no closing
+    `---`, which is what a torn write during a frontmatter update looks like. That
+    case must never be mistaken for "a task with no steps".
+    """
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
-        return {}, text
+        return {}, text, True
     meta: dict[str, str] = {}
-    end = len(lines)
+    end: int | None = None
     for i, line in enumerate(lines[1:], start=1):
         if line.strip() == "---":
             end = i
             break
         if not line.strip() or line.startswith((" ", "\t", "-", "#")):
-            continue  # nested block or comment; not a flat scalar
+            continue  # nested block or comment, not a flat scalar
         if ":" in line:
             key, _, value = line.partition(":")
             meta[key.strip()] = value.strip().strip("\"'")
-    return meta, "\n".join(lines[end + 1 :])
+    if end is None:
+        return meta, "", True
+    return meta, "\n".join(lines[end + 1 :]), False
 
 
-def open_step(body: str) -> dict[str, str] | None:
-    """Return the open step's heading and its bullet fields, if any step is open."""
+def parse_steps(body: str) -> tuple[dict[str, str] | None, int, bool]:
+    """Return (first open step, count of open steps, saw a `## Steps` heading).
+
+    The third value matters: a task whose steps live under some other heading -
+    `## Step log`, say - would otherwise look like a task with nothing open, and
+    the whole resume procedure keys off whether a step is open.
+    """
     lines = body.splitlines()
     in_steps = False
+    saw_steps_heading = False
+    first: dict[str, str] | None = None
     current: dict[str, str] | None = None
+    open_count = 0
     last_key: str | None = None
+
     for line in lines:
         stripped = line.strip()
+
         if stripped.startswith("## "):
             in_steps = stripped[3:].strip().lower().startswith("steps")
-            if current:
-                return current
+            saw_steps_heading = saw_steps_heading or in_steps
+            if current and first is None:
+                first = current
+            current = None
+            last_key = None
             continue
+
         if not in_steps:
             continue
+
         if stripped.startswith("### "):
-            if current:
-                return current
+            if current and first is None:
+                first = current
+            current = None
+            last_key = None
             heading = stripped[4:].strip()
             if OPEN_MARKER.search(heading):
+                open_count += 1
                 current = {"step": OPEN_MARKER.sub("", heading).strip()}
             continue
+
         if current is None:
             continue
         if stripped.startswith("- ") and ":" in stripped:
@@ -108,24 +137,41 @@ def open_step(body: str) -> dict[str, str] | None:
         elif stripped and last_key and not stripped.startswith(("-", "#", "|")):
             # wrapped continuation of the previous bullet - join rather than truncate
             current[last_key] = f"{current[last_key]} {stripped}".strip()
-    return current
+
+    if current and first is None:
+        first = current
+    return first, open_count, saw_steps_heading
+
+
+def looks_like_steps_heading(body: str) -> str | None:
+    """A `## ...step...` heading that is not `## Steps` - the silent-failure case."""
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("## ") and "step" in s.lower():
+            if not s[3:].strip().lower().startswith("steps"):
+                return s[3:].strip()
+    return None
 
 
 def load_tasks(root: Path) -> list[dict]:
     tasks = []
     for path in sorted((root / "tasks").glob("*.md")):
-        text = path.read_text(encoding="utf-8")
-        meta, body = parse_frontmatter(text)
+        meta, body, malformed = parse_frontmatter(path.read_text(encoding="utf-8"))
+        step, open_count, saw_steps = parse_steps(body)
         tasks.append(
             {
                 "path": path,
                 "meta": meta,
+                "malformed": malformed,
                 "id": meta.get("id", path.stem),
                 "title": meta.get("title", path.stem),
                 "status": meta.get("status", "").lower(),
-                "owner": meta.get("owner", ""),
+                "by": meta.get("last_modified_by", ""),
                 "updated_at": meta.get("updated_at", ""),
-                "open_step": open_step(body),
+                "open_step": step,
+                "open_count": open_count,
+                "saw_steps": saw_steps,
+                "odd_heading": looks_like_steps_heading(body),
             }
         )
     return tasks
@@ -139,11 +185,9 @@ def render(tasks: list[dict], archived: int) -> str:
     for status, heading in SECTIONS:
         rows = [t for t in tasks if t["status"] == status]
         rows.sort(key=lambda t: t["updated_at"], reverse=(status == "in-progress"))
-        out.append(f"## {heading}")
-        out.append("")
+        out += [f"## {heading}", ""]
         if not rows:
-            out.append("_none_")
-            out.append("")
+            out += ["_none_", ""]
             continue
         for t in rows:
             step = t["open_step"]
@@ -152,35 +196,36 @@ def render(tasks: list[dict], archived: int) -> str:
             if status != "in-progress" and step:
                 out.append(
                     f"    open step left behind: {step.get('step', '?')} - "
-                    "tree may be mid-surgery, reconcile before skipping this"
+                    "tree may be mid-edit, reconcile before skipping this"
                 )
             if status == "in-progress":
                 bits = []
                 if step:
                     bits.append(f"step open: {step.get('step', '?')}")
                     if step.get("anchor"):
-                        bits.append(f"anchor {step['anchor']}")
+                        bits.append(f"from {step['anchor']}")
                 else:
                     bits.append("no open step")
-                if t["owner"]:
-                    bits.append(t["owner"])
+                if t["by"]:
+                    bits.append(t["by"])
                 if t["updated_at"]:
                     bits.append(t["updated_at"])
                 out.append(f"    {' · '.join(bits)}")
-                nxt = (step or {}).get("intent") or (step or {}).get("next")
-                if nxt:
-                    out.append(f"    next: {nxt}")
+                if (step or {}).get("intent"):
+                    out.append(f"    next: {step['intent']}")
+                if (step or {}).get("files"):
+                    out.append(f"    mid-edit: {step['files']}")
                 if (step or {}).get("caveat"):
                     out.append(f"    caveat: {step['caveat']}")
             elif t["meta"].get("blocked_on"):
                 out.append(f"    blocked on: {t['meta']['blocked_on']}")
         out.append("")
-    out.append("---")
-    out.append("")
-    out.append(
+    out += [
+        "---",
+        "",
         f"{archived} archived. Do not read `tasks/archive/` during a resume - "
-        "search it only when hunting specific history."
-    )
+        "search it only when hunting specific history.",
+    ]
     return "\n".join(out).rstrip() + "\n"
 
 
@@ -193,6 +238,14 @@ def validate(tasks: list[dict]) -> list[str]:
 
     for t in tasks:
         name = t["path"].name
+
+        if t["malformed"]:
+            problems.append(
+                f"ERROR {name}: frontmatter has no closing `---`. This is what a torn write "
+                "looks like; the body cannot be parsed, so an open step here would be "
+                "invisible. Repair the file before trusting anything about this task."
+            )
+
         for key in ("id", "title", "status"):
             if not t["meta"].get(key):
                 problems.append(f"ERROR {name}: missing frontmatter key `{key}`")
@@ -204,23 +257,35 @@ def validate(tasks: list[dict]) -> list[str]:
             problems.append(f"ERROR {name}: duplicate id `{t['id']}` (also {seen[t['id']].name})")
         seen[t["id"]] = t["path"]
 
-        if t["status"] == "in-progress":
-            if not t["owner"]:
-                problems.append(f"ERROR {name}: in-progress with no `owner` - cannot lease")
-            if not t["updated_at"]:
-                problems.append(f"ERROR {name}: in-progress with no `updated_at` - lease cannot go stale")
-        elif t["open_step"]:
+        if t["status"] != "in-progress" and t["open_step"]:
             problems.append(
-                f"ERROR {name}: status `{t['status'] or '?'}` but a step is still open - "
-                "the tree may be mid-surgery and the next agent will skip past it. "
-                "Close the step before parking or closing the task."
+                f"ERROR {name}: status `{t['status'] or '?'}` but a step is still open - the "
+                "tree may be mid-edit and the next agent will skip straight past it. Close "
+                "the step before parking or closing the task."
             )
 
-        if t["status"] == "done":
-            problems.append(f"WARN  {name}: status done but still in tasks/ - move it to tasks/archive/")
+        if t["open_count"] > 1:
+            problems.append(
+                f"ERROR {name}: {t['open_count']} steps marked [open]. Only one step may be "
+                "open; the resume procedure cannot tell which one is current."
+            )
 
-        if t["open_step"] and not t["open_step"].get("verify"):
-            problems.append(f"WARN  {name}: open step has no `verify:` - nothing can prove it finished")
+        if t["odd_heading"] and not t["saw_steps"]:
+            problems.append(
+                f"ERROR {name}: steps appear to live under `## {t['odd_heading']}` rather than "
+                "`## Steps`. Nothing under it is parsed, so an open step is invisible here."
+            )
+
+        if t["status"] == "in-progress":
+            if not t["updated_at"]:
+                problems.append(
+                    f"WARN  {name}: in-progress with no `updated_at` - freshness cannot be judged"
+                )
+            if not t["by"]:
+                problems.append(f"WARN  {name}: in-progress with no `last_modified_by`")
+
+        if t["status"] == "done":
+            problems.append(f"WARN  {name}: status done but still in tasks/ - move to tasks/archive/")
 
     active = [t for t in tasks if t["status"] == "in-progress"]
     if len(active) > MAX_IN_PROGRESS:
@@ -228,14 +293,6 @@ def validate(tasks: list[dict]) -> list[str]:
             f"ERROR {len(active)} tasks in-progress (max {MAX_IN_PROGRESS}). "
             "Park one with status: paused."
         )
-    owners: dict[str, str] = {}
-    for t in active:
-        if t["owner"] and t["owner"] in owners:
-            problems.append(
-                f"ERROR {t['path'].name}: owner `{t['owner']}` already holds {owners[t['owner']]} - "
-                "one in-progress task per owner"
-            )
-        owners[t["owner"]] = t["id"]
     return problems
 
 
@@ -243,7 +300,7 @@ def validate(tasks: list[dict]) -> list[str]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description="Regenerate stele/TASKS.md and validate invariants.")
     ap.add_argument("--root", help="path to the stele/ directory")
     ap.add_argument("--check", action="store_true", help="do not write; exit 1 on drift or errors")
     args = ap.parse_args()
@@ -251,7 +308,7 @@ def main() -> int:
     root = find_root(args.root)
     if root is None:
         print(
-            "stele: no stele/tasks directory found - run from a project the skill has "
+            "stele: no stele/tasks directory found - run from a project that has been "
             "bootstrapped, or pass --root",
             file=sys.stderr,
         )
@@ -262,6 +319,7 @@ def main() -> int:
     archived = len(list(archive.glob("*.md"))) if archive.is_dir() else 0
 
     problems = validate(tasks)
+    errors = [p for p in problems if p.startswith("ERROR")]
     rendered = render(tasks, archived)
     index = root / "TASKS.md"
     current = index.read_text(encoding="utf-8") if index.exists() else ""
@@ -272,8 +330,10 @@ def main() -> int:
 
     if args.check:
         if drifted:
-            print("ERROR TASKS.md is stale - regenerate it (run this script without --check)", file=sys.stderr)
-        return 1 if (drifted or any(p.startswith("ERROR") for p in problems)) else 0
+            print(
+                "ERROR TASKS.md is stale - regenerate it (run without --check)", file=sys.stderr
+            )
+        return 1 if (drifted or errors) else 0
 
     if drifted:
         index.write_text(rendered, encoding="utf-8")
@@ -281,9 +341,14 @@ def main() -> int:
     else:
         print(f"stele: {index} already current")
 
-    active = [t for t in tasks if t["status"] == "in-progress"]
-    print(f"stele: {len(tasks)} live task(s), {len(active)} in-progress, {archived} archived")
-    return 1 if any(p.startswith("ERROR") for p in problems) else 0
+    active = sum(1 for t in tasks if t["status"] == "in-progress")
+    print(f"stele: {len(tasks)} live task(s), {active} in-progress, {archived} archived")
+    if problems:
+        print(
+            f"stele: {len(errors)} error(s), {len(problems) - len(errors)} warning(s) above - "
+            "the index was still written; use --check in CI to gate on them"
+        )
+    return 0
 
 
 if __name__ == "__main__":
