@@ -1,4 +1,9 @@
-# stele
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/img/logo-dark.png">
+    <img alt="stele" src="docs/img/logo-light.png" width="340">
+  </picture>
+</p>
 
 **Durable task state for AI coding agents, as a skill.**
 
