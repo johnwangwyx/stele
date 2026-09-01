@@ -22,15 +22,7 @@ Two independent checks, both cheap. Run them at the start of any session in a pr
 
 **1.1 Does `./stele/` exist?**
 
-If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` with these sections - filling in what you can infer from the repo, and leaving a field blank rather than guessing:
-
-- `## Summary` - 1-3 paragraphs: what this project is for, who consumes it, its shape
-- `## Invariants` - `Checks:` (every command that must pass: build, test, lint, typecheck), `Run locally:`, `Prerequisites:`, `Layout:`, `Conventions:`, `Dependencies:`, `How work lands:` (branch, commit, PR, CI), `Non-obvious constraints:`, and a `Last verified:` date
-- `## Guardrails` - `Do not touch:` (generated, vendored, codegen output) and `Do not run:` (destructive or expensive). `None.` until you find one; do not invent entries
-- `## Current state` - active workstream, open questions
-- `## Decisions` and `## Deferred` - `None.` until real
-
-The fuller template is `templates/PROJECT_CONTEXT.md` in this skill's directory if you can read it; the list above is enough without it.
+If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` from this skill's [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) - filling in what you can infer from the repo. Leave a field blank rather than guessing.
 
 Do not write `TASKS.md` by hand - generate it with this skill's own script, run from wherever the skill is installed:
 
@@ -38,7 +30,7 @@ Do not write `TASKS.md` by hand - generate it with this skill's own script, run 
 python3 <your-harness-skill-dir>/stele/scripts/index.py
 ```
 
-`<your-harness-skill-dir>` is the directory your harness keeps skills in - `~/.claude/skills` for Claude Code and `~/.codex/skills` for Codex, with other harnesses using their own. Substitute the real path - it is not a variable and nothing will expand it for you. The script walks up from the current directory to find `stele/`, so it needs no argument. It creates `TASKS.md` if absent and prints any invariant violation. Then continue with the user's actual request.
+`<your-harness-skill-dir>` is the directory your harness keeps skills in - `~/.claude/skills` for Claude Code and `~/.codex/skills` for Codex, with other harnesses using their own.
 
 **1.2 Is the pointer block present?** Check independently of 1.1
 
@@ -106,7 +98,7 @@ Nothing active: complete PASS anyway, then ask what to work on. Do not silently 
 
 ## 3. Writing state as you work
 
-Every field is listed under **Field reference** at the end of this section - that is the authority, and it is enough on its own. This skill's directory also carries `templates/task.md` and a worked `examples/stele/`, useful if your session can read outside the project, which many cannot.
+Every field is listed under **Field reference** at the end of this section. Full task skeleton: [templates/task.md](templates/task.md). A filled-in example with the project context that goes with it: [examples/stele/](examples/stele/).
 
 ### When to create, update, and close
 

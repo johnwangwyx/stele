@@ -35,9 +35,7 @@ stele writes each step *before* the work it describes. So the record does not de
 npx skills@latest add johnwangwyx/stele --global
 ```
 
-Pick your installed harnesses when it prompts. Add `--yes` to skip the prompts in scripts and CI.
-
-Once. Stele then sets itself up in each project the first time it runs there.
+This installs stele into the harnesses it detects on your machine, for all your projects.
 
 ## To use
 
@@ -84,7 +82,7 @@ The record is always one step ahead of the work. So when a session dies, everyth
 
 - **Each task file lists the tools and skills its plan assumed.** A `requires:` field captures them — so an agent in a harness that lacks one can say so, reach for the documented substitute, or ask, instead of finding the gap by watching something fail.
 - **The task list is generated, never hand-written.** `TASKS.md` — the index in the diagram above — is rendered from the individual task files on each resume, so it is always up-to-date.
-- **A step is only marked done once its check has actually run.** If a task could not be executed — no permission, a missing dependency, the wrong environment — the step stays open with attampts tracked.
+- **A step is only marked done once its check has actually run.** If a task could not be executed — no permission, a missing dependency, the wrong environment — the step stays open with attempts tracked.
 - **Each task file keeps an append-only record of what was already tried and failed.** Nothing gets deleted from it. That is the most expensive thing to lose, because the next agent is drawn to the same dead end and pays full price for it a second time.
 - **A decision that affects future work is promoted the moment it is made**, not when the task closes. Otherwise it sits invisible in one task file while other agents carry on without it.
 
