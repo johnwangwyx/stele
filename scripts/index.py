@@ -151,6 +151,13 @@ def validate(live: list[dict], done: list[dict]) -> list[str]:
             problems.append(
                 f"ERROR {name}: status `{t['status']}` is not one of {sorted(VALID_STATUS)}"
             )
+        stem_num = re.match(r"(\d+)", t["path"].stem)
+        id_num = re.search(r"(\d+)", t["id"])
+        if stem_num and id_num and stem_num.group(1).lstrip("0") != id_num.group(1).lstrip("0"):
+            problems.append(
+                f"WARN  {name}: filename says {stem_num.group(1)} but id is `{t['id']}` - "
+                "they should agree, or cross-references go to the wrong file"
+            )
         if t["id"] in seen:
             problems.append(f"ERROR {name}: duplicate id `{t['id']}` (also {seen[t['id']]})")
         seen[t["id"]] = name

@@ -1,13 +1,13 @@
 # stele
 
-**Durable task state for AI coding agents, in plain markdown.** Stop mid-task in one agent, start another — different model, harness, or provider — and it picks up where the last one stopped without being told anything.
+**Durable task state for AI coding agents, as a skill.**
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/lifecycle-dark.svg">
-  <img alt="One task across two sessions, both running stele. Three writes land on disk before the work they describe: opening step 2, closing it, opening step 3. A rate limit interrupts with step 3 still open. A second session in a different harness resumes and reconciles, diffing the open step against its anchor commit to find what was half-applied, then finishes and closes it." src="docs/img/lifecycle-light.svg" width="100%">
+  <img alt="One task across two sessions, both running stele. Three writes land on disk before the work they describe: opening step 2, closing it, opening step 3. A rate limit interrupts with step 3 still open. A second session in a different harness resumes, reads the open step to see what was half-applied, and finishes and closes it." src="docs/img/lifecycle-light.svg" width="100%">
 </picture>
 
-Every other answer to this is a *handoff* — you run `/handoff` and it writes a summary before you leave. That fails in exactly the case you need it, because a session that has been rate-limited or has crashed never gets to write anything. So stele writes before each step instead, and the break costs one step rather than everything.
+Exsiting solutions answer the record last: a handoff skill at the end of a session, a summary before you close the laptop. That works right up until the session ends without you — a usage limit, a crash — and then there is nothing at all. Writing first makes you resumable at every point, not just the ones you planned for.
 
 ## Install
 
@@ -52,9 +52,9 @@ Three levels, and nothing else:
 
 **Task** — one unit of work that will outlive a single session. Its goal, how you would know it is finished, its current state in a few lines, and an append-only record of what was already tried and failed. That last part is the most expensive thing to lose.
 
-**Step** — a slice of a task small enough to sit inside one sitting. This is where write-ahead happens: before touching anything, the agent records what it is about to do, which files, and the commit it is starting from. Afterwards it records the outcome.
+**Step** — a slice of a task small enough to sit inside one sitting. This is where write-ahead happens: before touching anything, the agent records what it is about to do and which files it will touch. Afterwards it records the outcome.
 
-That last detail is what makes a cold resume mechanical rather than a guess. The commit plus the file list means the next agent can diff *exactly* what the previous one had half-finished, instead of inferring it from prose. And because the record is written first, a session that dies has already written everything except the step it died inside.
+That ordering is what makes a cold resume tractable. The next agent opens the files the step named, runs the project's checks, and can tell *finished but never recorded* from *stopped halfway* — without asking anyone. And because the record is written before the work, a session that dies has already written everything except the step it died inside.
 
 See [`examples/stele/`](examples/stele/) for a complete, realistic instance.
 

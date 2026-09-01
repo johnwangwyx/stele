@@ -7,7 +7,7 @@ read first - orient the reader before they hit build commands.>
 
 ## Invariants
 
-_Rarely changes. If something here is wrong, an agent will act on it with confidence._
+<!-- Rarely changes. If something here is wrong, an agent will act on it with confidence. -->
 
 - **Checks:** every command that must pass before work counts as done - build, test, lint,
   typecheck, format. Not just tests; CI will fail on the others.
@@ -25,8 +25,8 @@ _Last verified: YYYY-MM-DD_
 
 ## Guardrails
 
-_What must not be touched or run. Read this even if you read nothing else - it is kept out of the
-list above so it is not skimmed past. `None` until you find the first one; do not invent entries._
+<!-- What must not be touched or run - kept out of the list above so it is not skimmed past.
+     `None` until you find the first one; do not invent entries. -->
 
 None.
 
@@ -37,15 +37,14 @@ None.
 
 ## Current state
 
-_Volatile. Update whenever it stops being true._
+<!-- Volatile. Update whenever it stops being true. -->
 
 - **Active workstream:**
 - **Open questions:**
 
 ## Decisions
 
-_Choices that bind future tasks. Promoted here when a task closes, so they outlive it. `None`
-until a task actually produces one._
+<!-- Choices that bind future tasks, promoted here when one is made. `None` until there is one. -->
 
 None.
 
@@ -53,9 +52,8 @@ None.
 
 ## Deferred
 
-_Known-broken things tolerated on purpose. Adapted from the aviation Minimum Equipment List: you
-may fly with it broken only if it is logged, justified, and dated. An entry with no `Until` is a
-TODO pretending to be a decision. `None` until something is genuinely deferred._
+<!-- Known-broken things tolerated on purpose. An entry with no `Until` is a TODO pretending to be
+     a decision. `None` until something is genuinely deferred. -->
 
 None.
 

@@ -14,6 +14,7 @@ stele/
   tasks/
     0007-slug.md        one live task per file, flat, stable path
     done/               closed tasks, kept whole
+  bin/index.py          regenerates TASKS.md and checks the rules
 ```
 
 ## 1. Bootstrap
@@ -24,17 +25,17 @@ Two independent checks, both cheap. Run them at the start of any session in a pr
 
 If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` from [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) - filling in what you can infer from the repo. Leave a field blank rather than guessing.
 
-Do not write `TASKS.md` by hand. Generate it:
+Copy this skill's `scripts/index.py` to `stele/bin/index.py`. The project then owns its own tooling, every later command is project-relative, and a clone without the skill installed can still regenerate its census. Then generate it - never write `TASKS.md` by hand:
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/index.py
+python3 stele/bin/index.py
 ```
 
-It creates the file if absent and prints any invariant violations (§6 covers the fallback if that path does not resolve). Then continue with the user's actual request.
+It creates the file if absent and prints any invariant violation. Then continue with the user's actual request.
 
 **1.2 Is the pointer block present?** Check independently of 1.1
 
-If not, add the block to every one of these the project already has: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.cursor/rules/stele.mdc`, `.kiro/steering/stele.md` etc. If it has none, create `AGENTS.md`.
+Put it in `AGENTS.md`, creating that if absent - it is the file Codex, Cursor, Copilot, Gemini CLI, opencode and Kiro read. Harnesses that read their own file get a one-line import instead of a second copy: `CLAUDE.md` containing `@AGENTS.md` for Claude Code, and the same for `GEMINI.md`, `.cursor/rules/stele.mdc` or `.kiro/steering/stele.md` where the project already uses them. One block, imported - never six copies to drift apart.
 
 Keep the block to a pointer. It exists so the next agent knows the skill applies here — not to carry a copy of the procedure, which would drift from this file and duplicate it into every instruction file the project has:
 
@@ -56,7 +57,7 @@ Run before editing anything, even given a direct instruction - it may already be
 **Regenerate first.** Before reading anything, rebuild the census from the task files:
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/index.py
+python3 stele/bin/index.py
 ```
 
 Now `TASKS.md` cannot be stale, and any invariant violation is printed before you act on the state — a task parked with a step still open, two tasks sharing an id, a torn frontmatter block. Read those errors; they change what you do next.
@@ -67,7 +68,7 @@ Without Python, read `TASKS.md` as a hint and confirm it against the task files 
 
 **A - Actions.** Read `stele/TASKS.md` — fresh, from the step above. Never read `tasks/done/` during a resume.
 
-**S - Situation.** Read only the active task file(s), and reconcile every open step per the table below - each has its own `anchor:` and `files:`, so reconcile them one at a time.
+**S - Situation.** Read only the active task file(s), and reconcile every open step per the table below - one at a time. The step record is what you reconcile from: its `intent:`, the `files:` it named, its `note:` bullets and its `done when:`. Read those files and run the project's `Checks` to see where the work actually stands.
 
 **S - Synthesis.** State back the goal, the next action, and the top risk in three lines. Then act - unless something diverges, in which case ask (§4).
 
@@ -75,17 +76,17 @@ Without Python, read `TASKS.md` as a hint and confirm it against the task files 
 
 ### Reconciling an open step
 
-| Observation | Meaning | Do |
+| What you find | Meaning | Do |
 |---|---|---|
-| `files:` unchanged since `anchor:` | declared, barely started | Start the step as written. |
-| `files:` changed, tree does not build | a session stopped mid-edit | Reconcile first. Read the diff against `intent:`, then finish the step or roll back to the anchor. Do not advance the plan. |
-| `files:` changed, tree builds, `done when` looks satisfied | finished but unrecorded | Confirm with the project's `Test:` command, write the `outcome:`, close the step. |
-| No open step, tree clean | coherent | Advance to the next action. |
-| No open step, tree dirty | unjournalled work | Do **not** start a new task. Diff against `HEAD`, attribute the changes to a task or open one for them, then continue. |
+| The `files:` do not exist, or hold nothing `intent:` describes | declared, not started | Start the step as written. |
+| They hold some of it, and `Checks` fail | a session stopped mid-edit | Reconcile first. Read `intent:` and any `note:`, then finish the step or revert those files. Do not advance the plan. |
+| They hold it, `Checks` pass, `done when:` reads satisfied | finished but never recorded | Say so, write the `outcome:`, close the step. Do not redo it. |
+| A `note:` says the work was written but never verified | the previous session could not run anything | Your job is to verify, not rewrite. Run `Checks` first; only change code if they fail. |
+| No open step, but files have changed | unjournalled work | Do **not** start a new task. Work out what changed, attribute it to a task or open one for it, then continue. |
 
-Compare `files:` specifically, not the whole worktree - a bare `git diff` against the anchor also picks up unrelated uncommitted changes and stele's own writes.
+Judge the step by what is on disk now, not by what a diff says. A file the step created will not show up in `git diff` against a commit at all if it was never added, and a project with no commits yet gives every step the same `anchor:` - both read as "nothing happened" and would have you rewrite finished work.
 
-Without git, `anchor:` is unusable. Fall back to the project's `Test:` command plus `done when:`, and say explicitly that you could not establish what the previous session changed.
+Where git is present **and** the anchor commit is real, `git status --short -- <files>` then `git diff <anchor> -- <files>` is useful corroboration - `status` first, because that is the one that shows a created file. Treat it as extra evidence, never the deciding vote.
 
 ### Choosing among several active tasks
 
@@ -132,6 +133,8 @@ Two may be open at once, for genuinely independent threads. Their `files:` must 
 
 Mark `[done]`, add `outcome:`, then rewrite `## State` - 3-5 lines, **replaced, not appended**. It is the condensed course of the work and the first thing the next agent reads, so a stale State is worse than none. Restore coherence first: the tree should build and the declared files should all be in one state.
 
+**Do not close a step you could not verify.** If the check could not run - no permission, missing dependency, wrong environment - leave the step `[open]`, record why in a `note:`, and say plainly that the work was reviewed by reading only. A step closed on an unrun check tells the next session the opposite of the truth.
+
 Interpretation may go in State, but must carry its evidence and be marked as a guess. A reader has to be able to tell what was measured from what was inferred, or the next agent inherits a hypothesis as ground truth.
 
 ### Record what failed
@@ -146,13 +149,14 @@ A decision or a discovered constraint that binds work **beyond this task** goes 
 
 1. Close any open step, and rewrite `## State` to describe where the work ended up.
 2. Check nothing still needs promoting - closed tasks are not read on resume, so a lesson left only in `tasks/done/` is lost.
-3. Set `status: done`, `git mv stele/tasks/0007-slug.md stele/tasks/done/`, then regenerate the census (§6).
+3. Set `status: done` and move the file: `mv stele/tasks/0007-slug.md stele/tasks/done/` (`git mv` in a tracked repo). Regenerate the census.
+4. Commit the work **and** `stele/` together. A task is not closed until the record has left this machine - that is the entire point of writing it down.
 
 A closed task keeps exactly the shape it had - same sections, every step `[done]` with its `outcome:`. Do not compact it or delete the step log. That log is the evidence of what was actually done, and it costs nothing to keep.
 
-### Commit it
+### Getting it off this machine
 
-`stele/` is worthless on another machine if it never leaves this one. Commit it with the work it describes, or on its own when a session ends. Task ids are allocated from the highest id in `tasks/` **and** `tasks/done/`.
+Closing a task commits `stele/` (above). Between closes, commit it whenever a session ends. Without git, whatever syncs the rest of the project has to carry `stele/` too, or "resume in any harness" quietly means "on this laptop". Task ids are allocated from the highest id in `tasks/` **and** `tasks/done/`.
 
 ### Field reference
 
@@ -169,7 +173,7 @@ Only the six marked **indexed** are read by tooling. Everything else exists for 
 | `created_at` | indexed | ISO timestamp. |
 | `updated_at` | indexed | ISO timestamp, set on **every** write. Drives the freshness check when several tasks are active, so a stale one makes live work look abandoned. |
 | `blocked_on` | prose | What the task is waiting on. Only meaningful with `status: blocked`. |
-| `requires` | prose | Tools or skills the plan assumed, each with `why` and a `fallback`. The fallback is the portable part: "needs tool X" only tells the next agent it is stuck, whereas `fallback: none - ask the user` converts a silent wrong answer into a question. |
+| `requires` | optional | Omit unless the plan assumed something unusual. When present, a nested block of `tools:` / `skills:`, each with `why` and a `fallback`. The fallback is the portable part: "needs tool X" only tells the next agent it is stuck, whereas `fallback: none - ask the user` turns a silent wrong answer into a question. |
 
 #### Step bullets
 
@@ -178,10 +182,10 @@ None of these are parsed. They are what a resuming agent actually reads, and the
 | Field | What it is |
 |---|---|
 | `last_modified_by` | Which harness and model opened or closed this step, as `harness@model`. |
-| `anchor` | `branch@sha` — the commit the step started from. Half of the reconcile. |
-| `files` | Comma-separated, **one line** — a nested list is not what the next agent expects to read. The other half of the reconcile: diff *these* files against the anchor, not the whole worktree. |
+| `anchor` | **Optional.** `branch@sha` when the repo is tracked and has commits - a reference point, not the mechanism. Omit it freely; the reconcile runs off `files:`, `intent:` and the project's `Checks`. |
+| `files` | Comma-separated, **one line**. What the next agent opens to see where the step got to, so name every file this step will touch and no others. The field the reconcile actually runs on. |
 | `intent` | What you are about to do. Written before acting; that is the whole point. |
-| `done when` | Prose describing the finished state. Never a command — task files carry no executable content. |
+| `done when` | The finished state, in prose. Naming a check is fine - "`make test` passes" - what to avoid is writing it as a line for something to run verbatim, since task files travel through pull requests. |
 | `caveat` | Something green but untrusted, e.g. "passes only against the local fixture". |
 | `note` | Findings picked up during a long step. |
 | `outcome` | Filled in at close, then mark the heading `[done]`. |
@@ -194,7 +198,7 @@ The one thing in the body that **is** parsed is the `[open]` marker on a `###` s
 
 ## 4. Asking the human
 
-They are the one constant across a harness switch, so they are the sender in the final S is the I-PAAS framwork. But they were not watching closely - that is why they delegated - so spend their attention only where an artifact cannot answer or you have concerns.
+They are the one constant across a harness switch, so they are the sender in the final S of I-PASS. But they were not watching closely - that is why they delegated - so spend their attention only where an artifact cannot answer or you have concerns.
 
 **Settle with the machine:** what changed, whether the tree builds, which task is active, whether tests pass. Never ask a human what a command can tell you; it trains them to rubber-stamp.
 
@@ -220,10 +224,10 @@ Checked by `index.py` (§6):
 `## Done` exists so you can see what has already been done without opening anything in `tasks/done/`.
 
 ```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/index.py
-python3 ${CLAUDE_SKILL_DIR}/scripts/index.py --check   # exit 1 on drift; for CI
+python3 stele/bin/index.py
+python3 stele/bin/index.py --check   # exit 1 on drift; for CI
 ```
 
-It finds `stele/` by walking up from wherever you are, so it works from a subdirectory too. Pass `--root <path>/stele` only to point at a different project, and note that a relative `--root` resolves against your current directory, not the script's.
+It finds `stele/` by walking up from wherever you are, so it works from a subdirectory too. Pass `--root <path>/stele` only to point at another project, and note that a relative `--root` resolves against your current directory, not the script's.
 
-If `${CLAUDE_SKILL_DIR}` is not substituted - it is Claude Code-specific - try `~/.claude/skills/stele/scripts/index.py` or the equivalent for your harness, and if you cannot find it, maintain `TASKS.md` by hand to the shape above and check §5 yourself. That works; it just loses the automatic checks.
+If `stele/bin/index.py` is missing, copy it from this skill's `scripts/` (§1.1). With no Python at all, keep `TASKS.md` roughly as the script writes it and check §5 by hand - that works, it just loses the automatic checks.

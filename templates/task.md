@@ -60,7 +60,7 @@ task goes straight to PROJECT_CONTEXT.md when you decide it, not at close._
 ### 1. <what this step does>  [open]
 
 - last_modified_by: <harness@model, e.g. claude-code@Opus-5>
-- anchor: <branch>@<sha> — the commit this step started from
+- anchor: <optional - branch@sha this step started from, when the repo is tracked and has commits>
 - files: <comma-separated files this step will touch, on one line>
 - intent: <what you are about to do>
 - done when: <how the next agent can tell this step finished>
