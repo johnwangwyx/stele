@@ -19,11 +19,9 @@ requires:
 ---
 
 <!-- status: todo | in-progress | blocked | paused | done
-     last_modified_by: the agent or model name that last wrote this file
-     Do not put trailing `#` comments on frontmatter values - they are parsed as part
-     of the value. Section names matter: the parser looks for `## Steps` exactly.
-     See examples/stele/ for a filled-in version of this file, plus the project
-     context that goes with it. -->
+     Do not put trailing `#` comments on frontmatter values - they parse as part of the value.
+     Section names matter: the parser looks for `## Steps` exactly.
+     Filled-in version, with the project context it belongs to: examples/stele/ -->
 
 ## Goal
 
@@ -31,38 +29,35 @@ requires:
 
 ## Done when
 
-<How anyone can tell the whole task is finished. Prose, not a command - the agent works out
-how to check it using the Build/Test commands in PROJECT_CONTEXT.>
+<How anyone can tell the whole task is finished. Prose, not a command - the agent works out how
+to check it using the Checks commands in PROJECT_CONTEXT.>
 
-## Summary
+## State
 
-<3-5 lines, rewritten (not appended) at each step close. The condensed course of the work -
-the first thing the next agent reads. Say plainly if the tree is mid-edit.>
+<3-5 lines, replaced (not appended) at each step close. The condensed course of the work, and the
+first thing the next agent reads - not a log. Say plainly if the tree is mid-edit.
 
-## Assessment
-
-<Interpretation, kept separate from observation, with the evidence for it. "Probably the
-non-unique sort column - two fixture rows share a timestamp and both appear on consecutive
-pages." If you have no evidence, say so.>
+Interpretation is allowed here, but it must carry its evidence and be marked as a guess:
+"probably the non-unique sort column - two fixture rows share a timestamp; not proven under
+concurrency." A reader must always be able to tell what was measured from what was inferred.>
 
 ## Attempts/Pitfalls
 
-_Append-only. Never delete an entry: a later agent will be drawn to the same dead end, and
-this is the only thing that stops it paying for the same failure twice._
+_Append-only. Never delete an entry: a later agent will be drawn to the same dead end, and this is
+the only thing that stops it paying for the same failure twice. Choices local to this task go here
+too - a decision is a rejected alternative plus a chosen one. Anything that binds work beyond this
+task goes straight to PROJECT_CONTEXT.md when you decide it, not at close._
 
 - <approach> - abandoned because <reason>. Evidence: <log line, error, measurement>
 - <gotcha discovered - something that will bite the next person even though nobody tried it>
-
-## Decisions
-
-- <choice made inside this task. Promote to PROJECT_CONTEXT.md on close if it binds future work.>
+- <choice made, and why the alternative lost>
 
 ## Steps
 
 <!-- Open a step BEFORE acting: editing files, anything over ~2 minutes, anything hard to
-     reverse, or a decision that binds future work. Five lines, not a paragraph. Written
-     ahead of the work so it survives the session doing it. Update `intent` and add findings
-     as you go on a long step - a step that dies at minute 38 should not read like minute 0. -->
+     reverse, or a decision that binds future work. Five lines, not a paragraph. Written ahead
+     of the work so it survives the session doing it. Update it as findings accumulate on a long
+     step - a step that dies at minute 38 should not read like minute 0. -->
 
 ### 1. <what this step does>  [open]
 

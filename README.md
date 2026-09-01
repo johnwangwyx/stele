@@ -99,10 +99,13 @@ scope: [src/routes/documents.ts, src/services/documents.ts]
 abort_when: if a third approach to the sort key fails, stop and ask - the schema probably needs a migration first
 ---
 
-## Summary
+## State
 Cursor encode/decode is finished. The keyset predicate is **half-applied**: the service builds
 `(created_at, id)` while the route still passes only `created_at`. Tree compiles; 3 of 9
 contract tests red.
+
+Guess, not proven: the duplicates are the non-unique `created_at`, not transaction isolation -
+two fixture rows share a timestamp and both appear on consecutive pages.
 
 ## Attempts/Pitfalls
 - Keyset on `created_at` alone - duplicates across pages when two rows share a timestamp.
@@ -131,6 +134,10 @@ Four things there carry most of the weight:
   the format doing its job.
 - **`caveat:` marks the untrusted-but-green.** Nothing in git or a test run can tell you the pass
   was against a fixture rather than production.
+- **`## State` is replaced, never appended.** It is the condensed course of the work, so a
+  resuming agent does not have to reconstruct it from the step log. Interpretation is allowed
+  there but has to carry its evidence and be labelled a guess — otherwise the next agent inherits
+  a hypothesis as fact.
 - **`abort_when` is decided at plan time.** An agent 40k tokens into a failing loop is precisely the
   entity that cannot decide to stop. Aviation commits to V1 before the roll begins. It is a
   reminder, not a mechanism — nothing counts your attempts for you.

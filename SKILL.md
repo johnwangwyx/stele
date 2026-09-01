@@ -184,31 +184,36 @@ them. A step that dies at minute 38 should not read like minute 0.
 
 ### Close a step
 
-Mark `[done]`, add `outcome:`, then rewrite `## Summary` - 3-5 lines, replaced not appended.
-Restore coherence first: the tree should build and the declared files should all be in one state.
-Only one step may be open at a time.
+Mark `[done]`, add `outcome:`, then rewrite `## State` - 3-5 lines, **replaced, not appended**. It
+is the condensed course of the work and the first thing the next agent reads, so a stale State is
+worse than none. Restore coherence first: the tree should build and the declared files should all
+be in one state. Only one step may be open at a time.
+
+Interpretation may go in State, but must carry its evidence and be marked as a guess. A reader has
+to be able to tell what was measured from what was inferred, or the next agent inherits a
+hypothesis as ground truth.
 
 ### Record what failed
 
-Append to `## Attempts/Pitfalls` whenever an approach is abandoned *or* you discover something
-that will bite the next person: what happened, why, and the evidence. **Append-only.** A later
-agent will be drawn to the same dead end, and this is the only thing that stops it paying twice.
+Append to `## Attempts/Pitfalls` whenever an approach is abandoned *or* you discover something that
+will bite the next person: what happened, why, and the evidence. **Append-only.** A later agent
+will be drawn to the same dead end, and this is the only thing that stops it paying twice. Choices
+local to this task go here too - a decision is a rejected alternative plus a chosen one.
 
-### Keep fact separate from assessment
+### Promote what outlives the task
 
-`## Summary` and `outcome:` are observations. Interpretation goes in `## Assessment` with the
-evidence for it. A reader must be able to tell what was measured from what was guessed, or the
-next agent inherits a hypothesis as ground truth.
+A decision or a discovered constraint that binds work **beyond this task** goes into
+`PROJECT_CONTEXT.md` the moment you make it - Decisions, Invariants, or Guardrails as fits - citing
+the task id. Not at close: a decision binds other agents *now*, and buffering it in a task file
+keeps it invisible to everyone else until the task ends.
 
 ### Close a task
 
 1. Close any open step.
-2. Compact: keep goal, outcome, decisions, and `Attempts/Pitfalls`. Delete the play-by-play.
-3. Promote anything binding future work to `PROJECT_CONTEXT.md` `## Decisions`, and any pitfall
-   worth keeping to its `## Invariants` or `## Guardrails` - closed tasks are not read on resume,
-   so a lesson left only in `tasks/done/` is lost.
-4. `git mv stele/tasks/0007-slug.md stele/tasks/done/`
-5. Regenerate the census (§6).
+2. Compact: keep goal, outcome and `Attempts/Pitfalls`. Delete the play-by-play.
+3. Check nothing still needs promoting - closed tasks are not read on resume, so a lesson left
+   only in `tasks/done/` is lost.
+4. `git mv stele/tasks/0007-slug.md stele/tasks/done/`, then regenerate the census (§6).
 
 ### Commit it
 

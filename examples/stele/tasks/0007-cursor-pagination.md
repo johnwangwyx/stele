@@ -29,36 +29,31 @@ parameters working for one release.
 page, and empty result; paginating a table that receives inserts mid-scan returns no duplicates;
 and `?page=` still works and is marked deprecated in the OpenAPI spec.
 
-## Summary
+## State
 
-Cursor encode/decode is finished and unit-tested. The route and service now accept `cursor`, but
+Cursor encode/decode is finished and unit-tested. The route and service both accept `cursor`, but
 the keyset predicate is **half-applied**: `services/documents.ts` builds the `(created_at, id)`
-predicate while `routes/documents.ts` still passes only `created_at` through. Tree compiles;
-3 of 9 contract tests red. Next: finish the route half, then re-run the suite.
+predicate while `routes/documents.ts` still passes only `created_at` through. Tree compiles; 3 of 9
+contract tests red. Next: finish the route half, then re-run the suite.
 
-## Assessment
-
-The duplicate rows are almost certainly the non-unique `created_at` rather than a transaction
-isolation problem — two fixture rows share a timestamp and both appear on consecutive pages.
-Not yet proven under genuine concurrent inserts, only against the fixture.
+Guess, not proven: the duplicates are the non-unique `created_at` rather than a transaction
+isolation problem — two fixture rows share a timestamp and both appear on consecutive pages. Not
+tested under genuine concurrent inserts.
 
 ## Attempts/Pitfalls
 
 _Append-only. A later agent will be drawn to the same dead ends._
 
 - Keyset on `created_at` alone — returns duplicates across pages whenever two rows share a
-  timestamp, and the fixture has three such pairs. `created_at` is not unique; PROJECT_CONTEXT
-  says so under Invariants and I missed it.
+  timestamp, and the fixture has three such pairs. `created_at` is not unique; PROJECT_CONTEXT says
+  so under Invariants and I missed it.
 - Encoding the cursor as raw JSON in the query string — breaks on the `+` in timestamps once
   URL-decoded. Switched to base64url.
 - Do not add `ORDER BY created_at DESC, id DESC` expecting it to be fast in staging: there is no
   `(created_at, id)` index there (see PROJECT_CONTEXT Deferred), so the plan falls back to a full
   sort. A fast local query is not evidence about staging.
-
-## Decisions
-
-- Cursor payload is `{created_at, id}`, base64url-encoded with a version prefix — not an offset
-  or a row number — so it stays valid when rows are inserted. Promote to PROJECT_CONTEXT on close.
+- Chose a translation shim for `?page=` over dual code paths through the service — one place to
+  delete when the deprecation lands. Task-local, so not promoted.
 
 ## Steps
 
