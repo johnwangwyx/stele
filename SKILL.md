@@ -1,6 +1,6 @@
 ---
 name: stele
-description: Durable project and task state as a skill, so any coding agent can resume work another agent started. Use at session start, when resuming after a break, crash, rate limit, or context compaction, when switching agents or harnesses (Claude Code, Codex, Cursor, Gemini CLI, Kiro, Copilot), when the user says "continue where we left off" / "pick up where I stopped" / "what was I working on", and before and after any substantial piece of work so the next session can continue it without being told anything. Sets itself up on first use in a project - there is no separate install step.
+description: Durable project and task state as a skill, so any coding agent can resume work another agent started. Use at session start, when resuming after a break, crash, rate limit, or context compaction, when switching agents or harnesses (Claude Code, Codex, Cursor, Gemini CLI, Kiro, Copilot), when the user says "continue where we left off" / "pick up where I stopped" / "what was I working on", and before and after any substantial piece of work so the next session can continue it without being told anything. Install the skill once; it then sets itself up in each project the first time it runs there.
 ---
 
 # stele
@@ -14,7 +14,6 @@ stele/
   tasks/
     0007-slug.md        one live task per file, flat, stable path
     done/               closed tasks, kept whole
-  bin/index.py          regenerates TASKS.md and checks the rules
 ```
 
 ## 1. Bootstrap
@@ -23,15 +22,23 @@ Two independent checks, both cheap. Run them at the start of any session in a pr
 
 **1.1 Does `./stele/` exist?**
 
-If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` from [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) - filling in what you can infer from the repo. Leave a field blank rather than guessing.
+If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` with these sections - filling in what you can infer from the repo, and leaving a field blank rather than guessing:
 
-Copy this skill's `scripts/index.py` to `stele/bin/index.py`. The project then owns its own tooling, every later command is project-relative, and a clone without the skill installed can still regenerate its census. Then generate it - never write `TASKS.md` by hand:
+- `## Summary` - 1-3 paragraphs: what this project is for, who consumes it, its shape
+- `## Invariants` - `Checks:` (every command that must pass: build, test, lint, typecheck), `Run locally:`, `Prerequisites:`, `Layout:`, `Conventions:`, `Dependencies:`, `How work lands:` (branch, commit, PR, CI), `Non-obvious constraints:`, and a `Last verified:` date
+- `## Guardrails` - `Do not touch:` (generated, vendored, codegen output) and `Do not run:` (destructive or expensive). `None.` until you find one; do not invent entries
+- `## Current state` - active workstream, open questions
+- `## Decisions` and `## Deferred` - `None.` until real
+
+The fuller template is `templates/PROJECT_CONTEXT.md` in this skill's directory if you can read it; the list above is enough without it.
+
+Do not write `TASKS.md` by hand - generate it with this skill's own script, run from wherever the skill is installed:
 
 ```bash
-python3 stele/bin/index.py
+python3 <your-harness-skill-dir>/stele/scripts/index.py
 ```
 
-It creates the file if absent and prints any invariant violation. Then continue with the user's actual request.
+`<your-harness-skill-dir>` is the directory your harness keeps skills in - `~/.claude/skills` for Claude Code and `~/.codex/skills` for Codex, with other harnesses using their own. Substitute the real path - it is not a variable and nothing will expand it for you. The script walks up from the current directory to find `stele/`, so it needs no argument. It creates `TASKS.md` if absent and prints any invariant violation. Then continue with the user's actual request.
 
 **1.2 Is the pointer block present?** Check independently of 1.1
 
@@ -57,7 +64,7 @@ Run before editing anything, even given a direct instruction - it may already be
 **Regenerate first.** Before reading anything, rebuild the census from the task files:
 
 ```bash
-python3 stele/bin/index.py
+python3 <your-harness-skill-dir>/stele/scripts/index.py
 ```
 
 Now `TASKS.md` cannot be stale, and any invariant violation is printed before you act on the state — a task parked with a step still open, two tasks sharing an id, a torn frontmatter block. Read those errors; they change what you do next.
@@ -99,7 +106,7 @@ Nothing active: complete PASS anyway, then ask what to work on. Do not silently 
 
 ## 3. Writing state as you work
 
-Every field is listed under **Field reference** at the end of this section. Full task skeleton: [templates/task.md](templates/task.md). A filled-in example with the project context that goes with it: [examples/stele/](examples/stele/).
+Every field is listed under **Field reference** at the end of this section - that is the authority, and it is enough on its own. This skill's directory also carries `templates/task.md` and a worked `examples/stele/`, useful if your session can read outside the project, which many cannot.
 
 ### When to create, update, and close
 
@@ -217,10 +224,10 @@ Surface divergence only, never the whole reconstruction. Closed questions, 2-4 o
 It also enforces the rules, and prints each one at the moment it fires rather than asking you to remember it: at most 2 steps `[open]` per task and none on a non-active task, at most 3 tasks `in-progress`, unique `id` across `tasks/` and `tasks/done/`, a valid `status`, frontmatter that closes, and a `TASKS.md` that matches the task files. Read what it prints - a violation changes what you do next.
 
 ```bash
-python3 stele/bin/index.py
-python3 stele/bin/index.py --check   # exit 1 on drift; for CI
+python3 <your-harness-skill-dir>/stele/scripts/index.py
+python3 <your-harness-skill-dir>/stele/scripts/index.py --check   # exit 1 on drift; for CI
 ```
 
 It finds `stele/` by walking up from wherever you are, so it works from a subdirectory too. Pass `--root <path>/stele` only to point at another project, and note that a relative `--root` resolves against your current directory, not the script's.
 
-If `stele/bin/index.py` is missing, copy it from this skill's `scripts/` (§1.1). With no Python at all, keep `TASKS.md` roughly as the script writes it and keep it roughly as the script would and accept that nothing is verifying it.
+One canonical copy lives in the installed skill, so updating the skill updates every project at once - nothing is vendored into your repo. It finds `stele/` by walking up from the current directory; pass `--root <path>/stele` to point at another project, and note a relative `--root` resolves against your current directory, not the script's. With no Python at all, keep `TASKS.md` roughly as the script writes it and accept that nothing verifies it.

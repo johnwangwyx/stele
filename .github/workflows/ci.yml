@@ -1,0 +1,92 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  package:
+    name: everything an install needs is present
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The skill is only useful if the whole bundle ships, not just SKILL.md.
+      # This is the check that would have caught an install landing without scripts/.
+      - name: required files
+        run: |
+          missing=0
+          for f in SKILL.md README.md LICENSE \
+                   scripts/index.py \
+                   templates/task.md templates/PROJECT_CONTEXT.md \
+                   examples/stele/PROJECT_CONTEXT.md \
+                   examples/stele/TASKS.md \
+                   examples/stele/tasks/0007-cursor-pagination.md \
+                   examples/stele/tasks/done/0005-choose-pagination-strategy.md; do
+            [ -f "$f" ] || { echo "missing: $f"; missing=1; }
+          done
+          exit $missing
+
+      - name: SKILL.md has the frontmatter a harness needs to load it
+        run: |
+          head -1 SKILL.md | grep -qx -- '---' || { echo "SKILL.md must open with ---"; exit 1; }
+          grep -qE '^name: *stele *$' SKILL.md || { echo "SKILL.md needs name: stele"; exit 1; }
+          grep -qE '^description: .{40,}' SKILL.md || { echo "SKILL.md needs a substantive description"; exit 1; }
+
+      - name: every file SKILL.md points at exists
+        run: |
+          rc=0
+          grep -oE '\[[^]]+\]\(([^)h][^)]*)\)' SKILL.md | sed -E 's/.*\((.*)\)/\1/' \
+            | sed 's#/$##' | sort -u | while read -r p; do
+              [ -e "$p" ] || { echo "SKILL.md links a missing path: $p"; rc=1; }
+            done
+          exit $rc
+
+      - name: no leftover placeholder paths
+        run: |
+          ! grep -rn 'CLAUDE_SKILL_DIR' SKILL.md README.md \
+            || { echo "use <your-harness-skill-dir>, not a variable nothing expands"; exit 1; }
+
+  indexer:
+    name: indexer works on a clean project and on the shipped example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'   # oldest we claim to support
+
+      - name: shipped example is self-consistent
+        run: python3 scripts/index.py --root examples/stele --check
+
+      - name: bootstraps a project that has none
+        run: |
+          mkdir -p /tmp/proj/stele/tasks/done && cd /tmp/proj
+          printf -- '---\nid: T-0001\ntitle: A task\nstatus: in-progress\nlast_modified_by: ci@test\nupdated_at: 2026-01-01T00:00Z\n---\n\n## Steps\n### 1. do it  [open]\n- files: a.py\n' \
+            > stele/tasks/0001-a.md
+          python3 "$GITHUB_WORKSPACE/scripts/index.py"
+          test -f stele/TASKS.md || { echo "TASKS.md was not created"; exit 1; }
+          grep -q 'T-0001' stele/TASKS.md
+          python3 "$GITHUB_WORKSPACE/scripts/index.py" --check
+
+      - name: runs from a subdirectory
+        run: |
+          mkdir -p /tmp/proj/src/deep && cd /tmp/proj/src/deep
+          python3 "$GITHUB_WORKSPACE/scripts/index.py" --check
+
+      - name: catches the invariants it claims to
+        run: |
+          cd /tmp/proj
+          # a parked task with a step still open
+          printf -- '---\nid: T-0002\ntitle: Parked\nstatus: paused\n---\n\n## Steps\n### 1. left open  [open]\n' \
+            > stele/tasks/0002-parked.md
+          if python3 "$GITHUB_WORKSPACE/scripts/index.py" --check; then
+            echo "should have failed: parked task with an open step"; exit 1
+          fi
+          rm stele/tasks/0002-parked.md
+          # frontmatter that never closes, i.e. a torn write
+          printf -- '---\nid: T-0003\ntitle: Torn\nstatus: todo\n' > stele/tasks/0003-torn.md
+          if python3 "$GITHUB_WORKSPACE/scripts/index.py" --check; then
+            echo "should have failed: unterminated frontmatter"; exit 1
+          fi

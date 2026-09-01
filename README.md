@@ -31,9 +31,13 @@ stele writes each step *before* the work it describes. So the record does not de
 
 ## Install
 
-You are already here and you have an agent. Hand it this:
+```bash
+npx skills@latest add johnwangwyx/stele --global
+```
 
-> Install https://github.com/johnwangwyx/stele as a skill under your framework.
+Pick your installed harnesses when it prompts. Add `--yes` to skip the prompts in scripts and CI.
+
+Once. Stele then sets itself up in each project the first time it runs there.
 
 ## To use
 
