@@ -123,12 +123,6 @@ def render(live: list[dict], done: list[dict]) -> str:
             out.append(f"- _...{len(ordered) - DONE_SHOWN} older, in `tasks/done/`_")
         out.append("")
 
-    out += [
-        "---",
-        "",
-        "Open task files only for what is Active. `tasks/done/` is listed here so you know what "
-        "has been done without reading it.",
-    ]
     return "\n".join(out).rstrip() + "\n"
 
 

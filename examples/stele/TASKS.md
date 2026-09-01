@@ -23,7 +23,3 @@ _none_
 ## Done
 
 - **T-0005** - Choose a pagination strategy for the public API · claude-code@Opus-5 · 2026-08-24T16:40Z
-
----
-
-Open task files only for what is Active. `tasks/done/` is listed here so you know what has been done without reading it.

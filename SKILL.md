@@ -208,20 +208,13 @@ Surface divergence only, never the whole reconstruction. Closed questions, 2-4 o
 
 **Record important answer** in the task file, or in `PROJECT_CONTEXT.md` if it binds future work. Human attention is the scarcest resource here; never spend it twice on the same question.
 
-## 5. Rules
-
-Checked by `index.py` (§6):
-
-- At most 2 steps `[open]` per task; a non-active task must have none.
-- At most 3 tasks `in-progress`.
-- Unique `id` across `tasks/` and `tasks/done/`; valid `status`; frontmatter closes with `---`.
-- `TASKS.md` matches the task files.
-
-## 6. Regenerating the census
+## 5. Regenerating the census
 
 `TASKS.md` is derived from the task files: `## Active` first, sorted by `updated_at` descending, then `## Todo`, `## Blocked`, `## Paused`, then `## Done` with the 20 most recently closed. One line per task — id and title, plus `last_modified_by` and `updated_at` on active ones. Flag any task that still has a step open.
 
 `## Done` exists so you can see what has already been done without opening anything in `tasks/done/`.
+
+It also enforces the rules, and prints each one at the moment it fires rather than asking you to remember it: at most 2 steps `[open]` per task and none on a non-active task, at most 3 tasks `in-progress`, unique `id` across `tasks/` and `tasks/done/`, a valid `status`, frontmatter that closes, and a `TASKS.md` that matches the task files. Read what it prints - a violation changes what you do next.
 
 ```bash
 python3 stele/bin/index.py
@@ -230,4 +223,4 @@ python3 stele/bin/index.py --check   # exit 1 on drift; for CI
 
 It finds `stele/` by walking up from wherever you are, so it works from a subdirectory too. Pass `--root <path>/stele` only to point at another project, and note that a relative `--root` resolves against your current directory, not the script's.
 
-If `stele/bin/index.py` is missing, copy it from this skill's `scripts/` (§1.1). With no Python at all, keep `TASKS.md` roughly as the script writes it and check §5 by hand - that works, it just loses the automatic checks.
+If `stele/bin/index.py` is missing, copy it from this skill's `scripts/` (§1.1). With no Python at all, keep `TASKS.md` roughly as the script writes it and keep it roughly as the script would and accept that nothing is verifying it.
