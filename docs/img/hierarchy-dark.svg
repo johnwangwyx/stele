@@ -28,7 +28,7 @@
   <!-- TASKS.md — one active, one done -->
   <path d="M250 60 H408 L432 84 V170 H250 Z" fill="#1a1a19" stroke="#2c2c2a" stroke-width="1.5"/>
   <path d="M408 60 V84 H432 Z" fill="#2c2c2a"/>
-  <text x="264" y="80" font-size="11" font-weight="600" fill="#ffffff">TASKS.md</text>
+  <text x="264" y="80" font-size="11" font-weight="600" fill="#ffffff">TASKS.md<tspan font-size="9" font-weight="400" fill="#898781">  (auto-generated)</tspan></text>
   <text x="264" y="106" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">ACTIVE</text>
   <rect x="264" y="114" width="96" height="9" rx="4.5" fill="#3987e5"/>
   <text x="264" y="144" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">DONE</text>
@@ -54,7 +54,7 @@
 
   <rect x="266" y="294" width="76" height="17" rx="8.5" fill="#0ca30c"/>
   <rect x="354" y="294" width="76" height="17" rx="8.5" fill="#0ca30c"/>
-  <rect x="442" y="294" width="60" height="17" rx="8.5" fill="none" stroke="#0ca30c" stroke-width="1.75"/>
+  <rect x="442" y="294" width="60" height="17" rx="8.5" fill="none" stroke="#3987e5" stroke-width="1.75"/>
   <rect x="538" y="294" width="82" height="17" rx="8.5" fill="#3987e5"/>
 
   <line x1="520" y1="284" x2="520" y2="322" stroke="#d03b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
