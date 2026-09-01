@@ -28,40 +28,40 @@ There is nothing to hand off, because the record is already on disk.
 ```
 your-project/
   AGENTS.md              <- pointer block, so any agent finds the rest
-  CLAUDE.md              <- same
   stele/
     PROJECT_CONTEXT.md   invariants + current state + decisions + deferred defects
     TASKS.md             generated census - never edited by hand
-    PROTOCOL.md          the PASS procedure, so the project explains itself
     tasks/
       0007-migrate-retry-mode.md
       archive/           closed tasks, compacted on close
-    bin/index.py         regenerates the census, enforces the invariants
 ```
 
-Everything is markdown in your repo. No database, no daemon, no service, no vendor. `grep`
-works. `git log` works. It survives your tooling.
+Four markdown files and a directory. No database, no daemon, no service, no vendor, and
+nothing copied into your repo that has to stay in sync with anything. `grep` works. `git log`
+works. It outlives your tooling.
 
 ## Quick start
 
-Ask your agent to install it:
-
-> Install https://github.com/johnwangwyx/stele into this project
-
-Or do it directly:
+Install the skill **once**:
 
 ```bash
 git clone https://github.com/johnwangwyx/stele ~/.claude/skills/stele
-cd /path/to/your-project
-python3 ~/.claude/skills/stele/scripts/install.py
 ```
 
-Then, in any harness, at any time:
+(or `~/.codex/skills/`, `~/.config/opencode/skills/`, or wherever your harness keeps skills -
+or just ask your agent to install it for you.)
+
+Then in any project, ever again:
 
 > continue where we left off
 
-The pointer block in `AGENTS.md` / `CLAUDE.md` means agents read the state at session start
-whether or not they know about this skill. Nothing to remember, no command to type.
+That's it. There is no per-project install step. The first time the skill runs somewhere it
+has never run before, it creates `stele/` and writes a pointer block into the project's agent
+instruction file - creating `AGENTS.md` if none exists - so the *next* agent finds the state
+whether or not it has this skill installed.
+
+The pointer block restates the core procedure inline rather than only pointing at it. An agent
+that has never heard of stele reads `AGENTS.md` and still resumes correctly.
 
 ## How it works: PASS
 
@@ -123,7 +123,8 @@ Four things there carry most of the weight:
 
 ## The invariants
 
-`bin/index.py` enforces these, so drift is a failing exit code rather than a surprise:
+The skill states these, and `scripts/index.py` enforces them - so drift is a failing exit code
+rather than a surprise:
 
 - Task files are the source of truth; `TASKS.md` is generated. Fix drift by regenerating.
 - Status lives in frontmatter, not in directory names. Paths are stable, so cross-references
@@ -136,9 +137,13 @@ Four things there carry most of the weight:
   file. A context system that costs 30k tokens to read is worse than none.
 
 ```bash
-python3 stele/bin/index.py          # regenerate
-python3 stele/bin/index.py --check  # exit 1 on drift or broken invariants (CI-friendly)
+python3 ~/.claude/skills/stele/scripts/index.py --root ./stele
+python3 ~/.claude/skills/stele/scripts/index.py --root ./stele --check   # exit 1 on drift
 ```
+
+The script is an accelerator, not a dependency. If an agent cannot find it, it maintains the
+census by hand from the shape given in the skill - it just loses the automatic drift and lease
+checks. Same principle as the `fallback:` field on a task's `requires:` block.
 
 ## Why there is no severity flag
 
@@ -157,16 +162,13 @@ have set it to `unstable` is exactly the agent that died before it could.
 
 ## Harness support
 
-`install.py` always writes `AGENTS.md` and `CLAUDE.md`, and additionally writes any harness
-config the project already uses: `.cursor/rules/`, `.kiro/steering/`, `GEMINI.md`,
-`.github/copilot-instructions.md`.
+On first run in a project, the skill adds its pointer block to every agent instruction file the
+project already uses - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`,
+`.cursor/rules/`, `.kiro/steering/` - and creates `AGENTS.md` if there are none.
 
-`AGENTS.md` alone covers Codex, Cursor, Copilot, Gemini CLI, opencode, Kiro and others.
-Re-run install any time to refresh the pointers and the copied protocol.
-
-The protocol and the indexer are **copied into your project**, not referenced from the skill.
-That is deliberate: the project carries its own instructions, so an agent that has never heard
-of stele can still follow them.
+`AGENTS.md` alone covers Codex, Cursor, Copilot, Gemini CLI, opencode and Kiro. The block is
+delimited by `<!-- stele:begin -->` / `<!-- stele:end -->` markers, so it is replaced rather
+than duplicated on later runs, and the rest of the file - which is yours - is left alone.
 
 ## Prior art
 
