@@ -2,13 +2,9 @@
 id: T-0007
 title: Migrate the /documents list endpoint from offset to cursor pagination
 status: in-progress
-last_modified_by: claude-opus-5
+last_modified_by: claude-code@Opus-5
 created_at: 2026-08-30T11:20Z
 updated_at: 2026-08-31T14:02Z
-scope:
-  - src/routes/documents.ts
-  - src/services/documents.ts
-  - test/contract/documents.test.ts
 requires:
   tools:
     - id: github.create_pull_request
@@ -58,7 +54,7 @@ _Append-only. A later agent will be drawn to the same dead ends._
 
 ### 1. Add cursor encode/decode helpers  [done]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@9c1e044
 - files: src/services/cursor.ts, test/unit/cursor.test.ts
 - intent: base64url encode/decode of `{created_at, id}` with a version prefix
@@ -68,7 +64,7 @@ _Append-only. A later agent will be drawn to the same dead ends._
 
 ### 2. Switch the service and route to keyset pagination  [open]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@a3f19c2
 - files: src/services/documents.ts, src/routes/documents.ts
 - intent: replace LIMIT/OFFSET with a `(created_at, id)` keyset predicate, and keep `?page=`

@@ -2,12 +2,9 @@
 id: T-0005
 title: Choose a pagination strategy for the public API
 status: done
-last_modified_by: claude-opus-5
+last_modified_by: claude-code@Opus-5
 created_at: 2026-08-20T09:00Z
 updated_at: 2026-08-24T16:40Z
-scope:
-  - bench/
-  - docs/adr/
 ---
 
 ## Goal
@@ -47,7 +44,7 @@ Deferred, with a date.
 
 ### 1. Measure the current offset behaviour  [done]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@41c0e7a
 - files: bench/offset-vs-keyset.md, bench/seed.ts
 - intent: seed 50k rows and time page 1, page 100, page 1000 with and without an index
@@ -57,7 +54,7 @@ Deferred, with a date.
 
 ### 2. Prototype keyset pagination  [done]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@41c0e7a
 - files: bench/keyset-proto.ts
 - intent: same queries with a `WHERE (created_at, id) < (?, ?)` predicate
@@ -67,7 +64,7 @@ Deferred, with a date.
 
 ### 3. Evaluate a materialised page-number table  [done]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@8bd1f92
 - files: bench/pagetable-proto.sql
 - intent: check whether precomputed page boundaries beat cursors for the client API
@@ -77,7 +74,7 @@ Deferred, with a date.
 
 ### 4. Write up the recommendation  [done]
 
-- last_modified_by: claude-opus-5
+- last_modified_by: claude-code@Opus-5
 - anchor: main@8bd1f92
 - files: docs/adr/0004-pagination.md
 - intent: cursors, opaque encoding, `(created_at, id)`, with the measurements attached

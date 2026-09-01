@@ -6,7 +6,7 @@
 ## Active
 
 - [!] **T-0007** - Migrate the /documents list endpoint from offset to cursor pagination
-    claude-opus-5 · 2026-08-31T14:02Z
+    claude-code@Opus-5 · 2026-08-31T14:02Z
 
 ## Todo
 
@@ -22,7 +22,7 @@ _none_
 
 ## Done
 
-- **T-0005** - Choose a pagination strategy for the public API · claude-opus-5 · 2026-08-24T16:40Z
+- **T-0005** - Choose a pagination strategy for the public API · claude-code@Opus-5 · 2026-08-24T16:40Z
 
 ---
 

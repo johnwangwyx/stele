@@ -29,6 +29,7 @@ HEADER = (
 
 VALID_STATUS = {"todo", "in-progress", "blocked", "paused", "done"}
 MAX_IN_PROGRESS = 3
+MAX_OPEN_STEPS = 2
 DONE_SHOWN = 20
 SECTIONS = [
     ("in-progress", "Active"),
@@ -156,10 +157,10 @@ def validate(live: list[dict], done: list[dict]) -> list[str]:
 
     for t in live:
         name = t["path"].name
-        if t["open_steps"] > 1:
+        if t["open_steps"] > MAX_OPEN_STEPS:
             problems.append(
-                f"ERROR {name}: {t['open_steps']} steps marked [open]. Only one may be open; "
-                "otherwise nothing can tell which is current."
+                f"ERROR {name}: {t['open_steps']} steps marked [open] (max {MAX_OPEN_STEPS}). "
+                "Close one before opening another."
             )
         if t["status"] != "in-progress" and t["open_steps"]:
             problems.append(

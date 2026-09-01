@@ -5,8 +5,6 @@ status: todo
 last_modified_by:
 created_at: YYYY-MM-DDTHH:MMZ
 updated_at: YYYY-MM-DDTHH:MMZ
-scope:
-  - <the files or packages this task touches>
 requires:
   tools:
     - id: <tool or MCP tool name>
@@ -61,7 +59,7 @@ task goes straight to PROJECT_CONTEXT.md when you decide it, not at close._
 
 ### 1. <what this step does>  [open]
 
-- last_modified_by: <agent or model name>
+- last_modified_by: <harness@model, e.g. claude-code@Opus-5>
 - anchor: <branch>@<sha> — the commit this step started from
 - files: <comma-separated files this step will touch, on one line>
 - intent: <what you are about to do>
