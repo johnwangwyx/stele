@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="444" viewBox="0 0 720 444"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img"
+     aria-label="PROJECT_CONTEXT.md points to TASKS.md, which lists one active task and one done. Dotted arrows lead from TASKS.md to task1.md and task2.md. Inside task2.md, four step bars: two completed by Agent A, a third left unfinished when a rate limit cuts the session, and a fourth taken up by Agent B. Dotted arrows show Agent B reading task2.md, TASKS.md and PROJECT_CONTEXT.md before it reconciles and resumes.">
+  <rect width="720" height="444" fill="#fcfcfb"/>
+  <defs>
+    <marker id="ml" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1 L7 4 L0 7 Z" fill="#898781"/></marker>
+    <marker id="bl" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1 L7 4 L0 7 Z" fill="#2a78d6"/></marker>
+  </defs>
+
+  <!-- ══ Agent B reads all three, routed over the top so it crosses nothing ══ -->
+  <path d="M660 424 H700 V26 H110 V52" fill="none" stroke="#2a78d6" stroke-width="1.25"
+        stroke-dasharray="4 4" marker-end="url(#bl)"/>
+  <path d="M341 26 V52" fill="none" stroke="#2a78d6" stroke-width="1.25"
+        stroke-dasharray="4 4" marker-end="url(#bl)"/>
+
+  <!-- PROJECT_CONTEXT.md -->
+  <path d="M18 60 H176 L200 84 V170 H18 Z" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+  <path d="M176 60 V84 H200 Z" fill="#e1e0d9"/>
+  <text x="32" y="80" font-size="11" font-weight="600" fill="#0b0b0b">PROJECT_CONTEXT.md</text>
+  <g stroke="#e1e0d9" stroke-width="4" stroke-linecap="round">
+    <line x1="32" y1="106" x2="176" y2="106"/><line x1="32" y1="124" x2="140" y2="124"/>
+    <line x1="32" y1="142" x2="182" y2="142"/><line x1="32" y1="158" x2="120" y2="158"/></g>
+
+  <path d="M208 115 H240" stroke="#898781" stroke-width="1.25" stroke-dasharray="3 4" marker-end="url(#ml)"/>
+
+  <!-- TASKS.md — one active, one done -->
+  <path d="M250 60 H408 L432 84 V170 H250 Z" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+  <path d="M408 60 V84 H432 Z" fill="#e1e0d9"/>
+  <text x="264" y="80" font-size="11" font-weight="600" fill="#0b0b0b">TASKS.md</text>
+  <text x="264" y="106" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">ACTIVE</text>
+  <rect x="264" y="114" width="96" height="9" rx="4.5" fill="#2a78d6"/>
+  <text x="264" y="144" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">DONE</text>
+  <rect x="264" y="152" width="72" height="9" rx="4.5" fill="#0ca30c"/>
+
+  <!-- TASKS.md -> each task document -->
+  <path d="M280 178 Q246 208 138 230" fill="none" stroke="#898781" stroke-width="1.25" stroke-dasharray="3 4" marker-end="url(#ml)"/>
+  <path d="M392 178 Q420 206 440 230" fill="none" stroke="#898781" stroke-width="1.25" stroke-dasharray="3 4" marker-end="url(#ml)"/>
+
+  <!-- task1.md — closed -->
+  <path d="M18 238 H160 L184 262 V336 H18 Z" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+  <path d="M160 238 V262 H184 Z" fill="#e1e0d9"/>
+  <text x="32" y="258" font-size="11" font-weight="600" fill="#898781">task1.md</text>
+  <text x="32" y="282" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">STEPS</text>
+  <rect x="32" y="294" width="66" height="15" rx="7.5" fill="#0ca30c"/>
+  <rect x="108" y="294" width="52" height="15" rx="7.5" fill="#0ca30c"/>
+
+  <!-- task2.md — live, with its steps -->
+  <path d="M250 238 H616 L640 262 V336 H250 Z" fill="#fcfcfb" stroke="#e1e0d9" stroke-width="1.5"/>
+  <path d="M616 238 V262 H640 Z" fill="#e1e0d9"/>
+  <text x="266" y="258" font-size="11" font-weight="600" fill="#0b0b0b">task2.md</text>
+  <text x="266" y="282" font-size="9.5" font-weight="600" letter-spacing="0.5" fill="#898781">STEPS</text>
+
+  <rect x="266" y="294" width="76" height="17" rx="8.5" fill="#0ca30c"/>
+  <rect x="354" y="294" width="76" height="17" rx="8.5" fill="#0ca30c"/>
+  <rect x="442" y="294" width="60" height="17" rx="8.5" fill="none" stroke="#0ca30c" stroke-width="1.75"/>
+  <rect x="538" y="294" width="82" height="17" rx="8.5" fill="#2a78d6"/>
+
+  <line x1="520" y1="284" x2="520" y2="322" stroke="#d03b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <circle cx="520" cy="276" r="7.5" fill="#d03b3b"/>
+  <path d="M516.8 272.8 L523.2 279.2 M523.2 272.8 L516.8 279.2" stroke="#fcfcfb" stroke-width="1.7" stroke-linecap="round"/>
+  <text x="520" y="358" text-anchor="middle" font-size="10" font-weight="600" fill="#d03b3b">rate limit</text>
+
+  <!-- who ran which steps -->
+  <line x1="266" y1="384" x2="502" y2="384" stroke="#e1e0d9" stroke-width="1.5"/>
+  <g transform="translate(365 394)"><circle cx="6.5" cy="1.6" r="1.6" fill="#52514e"/><line x1="6.5" y1="2.6" x2="6.5" y2="4.4" stroke="#52514e" stroke-width="1.4"/><rect x="0" y="4" width="13" height="10.5" rx="3.2" fill="#52514e"/><circle cx="4.2" cy="9.2" r="1.7" fill="#fcfcfb"/><circle cx="8.8" cy="9.2" r="1.7" fill="#fcfcfb"/></g>
+  <text x="384" y="406" font-size="10.5" font-weight="600" fill="#52514e">Agent A</text>
+
+  <line x1="538" y1="384" x2="620" y2="384" stroke="#2a78d6" stroke-width="1.5"/>
+  <g transform="translate(546 394)"><circle cx="6.5" cy="1.6" r="1.6" fill="#2a78d6"/><line x1="6.5" y1="2.6" x2="6.5" y2="4.4" stroke="#2a78d6" stroke-width="1.4"/><rect x="0" y="4" width="13" height="10.5" rx="3.2" fill="#2a78d6"/><circle cx="4.2" cy="9.2" r="1.7" fill="#fcfcfb"/><circle cx="8.8" cy="9.2" r="1.7" fill="#fcfcfb"/></g>
+  <text x="565" y="406" font-size="10.5" font-weight="600" fill="#2a78d6">Agent B</text>
+  <text x="565" y="422" font-size="10" fill="#2a78d6">reconcile &amp; resume</text>
+
+  <!-- Agent B also reads the task file it is resuming -->
+  <path d="M700 308 H648" fill="none" stroke="#2a78d6" stroke-width="1.25"
+        stroke-dasharray="4 4" marker-end="url(#bl)"/>
+</svg>
