@@ -7,7 +7,7 @@
   <img alt="One task across two sessions, both running stele. Three writes land on disk before the work they describe: opening step 2, closing it, opening step 3. A rate limit interrupts with step 3 still open. A second session in a different harness resumes, reads the open step to see what was half-applied, and finishes and closes it." src="docs/img/lifecycle-light.svg" width="100%">
 </picture>
 
-Exsiting solutions answer the record last: a handoff skill at the end of a session, a summary before you close the laptop. That works right up until the session ends without you — a usage limit, a crash — and then there is nothing at all. Writing first makes you resumable at every point, not just the ones you planned for.
+Existing solutions write the record last: a handoff skill at the end of a session, a summary before you close the laptop. That works right up until the session ends without you — a usage limit, a crash — and then there is nothing at all. Writing first makes you resumable at every point, not just the ones you planned for.
 
 ## Install
 
@@ -42,7 +42,7 @@ Note: You will mostly not even need the skill trigger (`/stele` or `$stele`). Th
   <img alt="A mapping between the clinical I-PASS handoff protocol and stele. Patient summary maps to PROJECT_CONTEXT.md, action list to TASKS.md, situation awareness to the open step, and synthesis by the receiver — echoing the situation back — to reading the record back, confirming it, then continuing." src="docs/img/pass-light.svg" width="100%">
 </picture>
 
-**I-PASS** is the shift-change handover protocol hospitals adopted once transitions proved to be where patients come to harm. The departing clinician holds context that never reached the charts or reports, and the arriving one cannot know what is missing. **It is an example of an evidence-based option for conducting a structured handoff.**
+**[I-PASS](https://www.ahrq.gov/teamstepps-program/curriculum/communication/tools/ipass.html)** is the shift-change handover protocol hospitals adopted once transitions proved to be where patients come to harm. The departing clinician holds context that never reached the charts or reports, and the arriving one cannot know what is missing. **It is an example of an evidence-based option for conducting a structured handoff.**
 
 ## How it works
 
