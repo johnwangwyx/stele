@@ -76,8 +76,8 @@ harm concentrates at transitions.
 | **S** | Situation | Active task, open step, the tree state when it opened, the command that proves it done |
 | **S** | Synthesis | The receiver states back goal / next action / top risk — and checks it |
 
-The full protocol, including what it deliberately does *not* copy from medicine and aviation,
-is in [PROTOCOL.md](PROTOCOL.md).
+The operational form of all four - what to read, in what order, and what to do about each
+outcome - is in [SKILL.md](SKILL.md).
 
 ## A task, mid-work
 
@@ -159,6 +159,36 @@ no open step + verify passes                    ->  coherent
 
 A derived signal cannot go stale or lie. A declared one can do both — and the agent that would
 have set it to `unstable` is exactly the agent that died before it could.
+
+## What replaces the sender
+
+In a clinical handoff the outgoing clinician is standing there: the receiver states back what
+they understood, and gets corrected on the spot. That correction is what makes the final S work.
+
+Here the sending agent is gone — its session ended, hit a limit, or crashed. That is the whole
+premise. Two things stand in for it:
+
+- **Machine-checkable state.** `verify:` and `anchor:` correct the receiver with nobody present.
+  This is why they are mandatory rather than nice to have: they carry the load the sender
+  carries in medicine.
+- **The human.** The one element constant across a harness switch — but a degraded sender. They
+  were not watching closely (that is why they delegated), time has passed, and they may not be
+  available. So route by who can settle the question: the machine for state, the human for
+  intent, priority, and contradiction. Never ask a human what a command can answer; that trains
+  them to rubber-stamp.
+
+## What was deliberately not copied
+
+High-reliability industries have well-documented failure modes, and an LLM makes each worse,
+because it will always produce something that *looks* like a valid entry.
+
+- **Checklist fatigue.** Long checklists get filled in without being read. Few fields.
+- **Copy-forward.** Clinical notes propagate stale pasted text that outlives its truth and
+  causes harm. Every field is either machine-checkable or cheap to leave blank.
+- **Alarm fatigue.** If everything is flagged, nothing is.
+
+Hence the governing rule: **prefer a field a machine can check over prose a model can fake.**
+One `verify:` command that runs is worth ten narrative fields.
 
 ## Harness support
 
