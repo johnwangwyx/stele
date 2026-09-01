@@ -6,8 +6,7 @@ last_modified_by:
 created_at: YYYY-MM-DDTHH:MMZ
 updated_at: YYYY-MM-DDTHH:MMZ
 scope:
-  - <file glob this task may touch - required when agents run in parallel>
-abort_when: <the stopping rule, decided now while the plan is fresh, e.g. "if a third approach fails, stop and ask">
+  - <the files or packages this task touches>
 requires:
   tools:
     - id: <tool or MCP tool name>
@@ -19,8 +18,9 @@ requires:
 ---
 
 <!-- status: todo | in-progress | blocked | paused | done
-     Do not put trailing `#` comments on frontmatter values - they parse as part of the value.
-     Section names matter: the parser looks for `## Steps` exactly.
+     Only id, title, status, last_modified_by, created_at and updated_at are read by tooling.
+     Everything else here is for whoever reads the file. Do not put trailing `#` comments on
+     frontmatter values - they parse as part of the value.
      Filled-in version, with the project context it belongs to: examples/stele/ -->
 
 ## Goal

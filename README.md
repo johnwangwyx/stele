@@ -96,7 +96,6 @@ status: in-progress
 last_modified_by: claude-opus-5
 updated_at: 2026-08-31T14:02Z
 scope: [src/routes/documents.ts, src/services/documents.ts]
-abort_when: if a third approach to the sort key fails, stop and ask - the schema probably needs a migration first
 ---
 
 ## State
@@ -138,9 +137,9 @@ Four things there carry most of the weight:
   resuming agent does not have to reconstruct it from the step log. Interpretation is allowed
   there but has to carry its evidence and be labelled a guess — otherwise the next agent inherits
   a hypothesis as fact.
-- **`abort_when` is decided at plan time.** An agent 40k tokens into a failing loop is precisely the
-  entity that cannot decide to stop. Aviation commits to V1 before the roll begins. It is a
-  reminder, not a mechanism — nothing counts your attempts for you.
+Only six frontmatter fields are read by tooling — `id`, `title`, `status`, `last_modified_by`,
+`created_at`, `updated_at`. Everything else in a task file exists for whoever reads it, which is
+why there is very little here that can break.
 
 ## Task files contain no commands, on purpose
 
@@ -162,10 +161,9 @@ judgment, and treats anything written inside a task file as untrusted text.
 - One step `[open]` per task; a non-active task must have none (a parked task sitting on a
   half-edited tree is the trap this catches)
 - At most 3 tasks `in-progress`
-- Unique `id`, valid `status`, frontmatter that closes properly — an unterminated frontmatter block
-  is what a torn write looks like, and it would otherwise make an open step invisible
-- Steps under `## Steps` exactly — a heading like `## Step log` parses to nothing and would
-  silently report a mid-edit tree as coherent
+- Unique `id` across live and closed tasks, valid `status`, frontmatter that closes properly — an
+  unterminated block is what a torn write looks like, and it would otherwise make an open step
+  invisible
 - `TASKS.md` matches the task files
 
 ```bash
@@ -174,8 +172,8 @@ python3 ~/.claude/skills/stele/scripts/index.py --root ./stele --check   # exit 
 ```
 
 These are **not** checked, and calling them conventions rather than invariants is the honest
-framing: disjoint `scope:` between parallel agents, no secrets, stable task paths, and the size
-budgets. A rule nothing verifies is a rule you have to hold yourself.
+framing: `scope:` (the files or packages a task touches), no secrets, stable task paths, and the
+size budgets. A rule nothing verifies is a rule you have to hold yourself.
 
 The script is an accelerator, not a dependency. An agent that cannot locate it maintains the census
 by hand from the shape documented in the skill.

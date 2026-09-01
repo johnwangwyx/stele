@@ -9,7 +9,6 @@ scope:
   - src/routes/documents.ts
   - src/services/documents.ts
   - test/contract/documents.test.ts
-abort_when: if a third approach to the sort key fails, stop and ask - the schema probably needs a migration first
 requires:
   tools:
     - id: github.create_pull_request

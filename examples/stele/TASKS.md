@@ -6,10 +6,7 @@
 ## Active
 
 - [!] **T-0007** - Migrate the /documents list endpoint from offset to cursor pagination
-    step open: 2. Switch the service and route to keyset pagination · from main@a3f19c2 · claude-opus-5 · 2026-08-31T14:02Z
-    next: replace LIMIT/OFFSET with a `(created_at, id)` keyset predicate, and keep `?page=` working through a translation shim
-    mid-edit: src/services/documents.ts, src/routes/documents.ts
-    caveat: the service half passes its unit tests, but only against the small local fixture and with no `(created_at, id)` index in staging — do not read a fast local query as evidence about production behaviour
+    claude-opus-5 · 2026-08-31T14:02Z
 
 ## Todo
 
@@ -23,6 +20,10 @@ _none_
 
 _none_
 
+## Done
+
+- **T-0005** - Choose a pagination strategy for the public API · claude-opus-5 · 2026-08-24T16:40Z
+
 ---
 
-1 done. Do not read `tasks/done/` during a resume - search it only when hunting specific history.
+Open task files only for what is Active. `tasks/done/` is listed here so you know what has been done without reading it.

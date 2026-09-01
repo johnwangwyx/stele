@@ -248,14 +248,16 @@ Checked by `index.py` (§6):
 
 - One step `[open]` per task; a non-active task must have no open step.
 - At most 3 tasks `in-progress`.
-- Unique `id`; valid `status`; frontmatter must close with `---`.
-- Steps must live under `## Steps` exactly.
+- Unique `id` across `tasks/` and `tasks/done/`; valid `status`; frontmatter closes with `---`.
 - `TASKS.md` matches the task files.
+
+Only `id`, `title`, `status`, `last_modified_by`, `created_at` and `updated_at` are read by the
+tooling. Every other field is for whoever reads the file, which is why there is so little that can
+break.
 
 Not checked - conventions you have to hold yourself:
 
-- Parallel agents declare `scope:` (file globs) and keep them disjoint. Overlapping scopes are
-  unsafe at two agents, and nothing can detect that for you.
+- `scope:` lists the files or packages the task touches. Nothing verifies it.
 - No secrets, tokens, internal hostnames, or customer data. This directory gets committed.
 - Task paths stay stable; status lives in frontmatter, never in directory names. The only move is
   into `done/` on close.
@@ -263,10 +265,13 @@ Not checked - conventions you have to hold yourself:
 
 ## 6. Regenerating the census
 
-`TASKS.md` is derived from `stele/tasks/*.md`: `## Active` first, sorted by `updated_at`
-descending, each row carrying id, title, open step, anchor, `last_modified_by`, timestamp, next
-action, mid-edit files and any caveat; then `## Todo`, `## Blocked`, `## Paused`. Flag any task
-with an open step.
+`TASKS.md` is derived from the task files: `## Active` first, sorted by `updated_at` descending,
+then `## Todo`, `## Blocked`, `## Paused`, then `## Done` with the 20 most recently closed. One line
+per task — id and title, plus `last_modified_by` and `updated_at` on active ones. Flag any task that
+still has a step open.
+
+`## Done` exists so you can see what has already been done without opening anything in
+`tasks/done/`. Open task files only for what is Active.
 
 ```bash
 python3 ${CLAUDE_SKILL_DIR}/scripts/index.py --root ./stele
