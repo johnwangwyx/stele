@@ -5,14 +5,25 @@
   </picture>
 </p>
 
-**Durable task state for AI coding agents, as a skill.**
+**Crash-proof task memory for coding agents.** Claude hit its usage limit halfway through a refactor? Resume the same task in Codex, Cursor, or a fresh session without reconstructing anything.
+
+### Most agent memory is write-after. stele is write-ahead.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/lifecycle-dark.svg">
   <img alt="One task across two sessions, both running stele. Three writes land on disk before the work they describe: opening step 2, closing it, opening step 3. A rate limit interrupts with step 3 still open. A second session in a different harness resumes, reads the open step to see what was half-applied, and finishes and closes it." src="docs/img/lifecycle-light.svg" width="100%">
 </picture>
 
-Existing solutions write the record last: a handoff skill at the end of a session, a summary before you close the laptop. That works right up until the session ends without you — a usage limit, a crash — and then there is nothing at all. Writing first makes you resumable at every point, not just the ones you planned for.
+Everything else writes the record last: a handoff skill at the end of a session, a summary before you close the laptop, a memory file updated once the work is done. That holds right up until the session ends without you — a usage limit, a crash, a closed laptop — and then there is nothing at all.
+
+stele writes each step *before* the work it describes. So the record does not depend on the session surviving long enough to write it.
+
+| | Rate limit / crash | Context compaction | Knows what was half-done | Remembers failed attempts | Never stale |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Handoff skills, `/handoff` | ❌ | ❌ | ⚠️ | ⚠️ | ✅ |
+| Memory banks, `CLAUDE.md` notes | ⚠️ | ⚠️ | ❌ | ⚠️ | ❌ |
+| Planning files | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+| **stele** | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## Install
 
