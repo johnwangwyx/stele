@@ -35,12 +35,6 @@ You are already here and you have an agent. Hand it this:
 
 > Install https://github.com/johnwangwyx/stele as a skill under your framework.
 
-Expect two approvals: one to fetch the repo, one to write outside the project. Or do it yourself — it is a clone into wherever your harness keeps skills:
-
-```bash
-git clone https://github.com/johnwangwyx/stele ~/.claude/skills/stele
-```
-
 ## To use
 
 ### 1. Start managing a project
