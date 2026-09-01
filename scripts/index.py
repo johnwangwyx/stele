@@ -223,7 +223,7 @@ def render(tasks: list[dict], archived: int) -> str:
     out += [
         "---",
         "",
-        f"{archived} archived. Do not read `tasks/archive/` during a resume - "
+        f"{archived} done. Do not read `tasks/done/` during a resume - "
         "search it only when hunting specific history.",
     ]
     return "\n".join(out).rstrip() + "\n"
@@ -285,7 +285,7 @@ def validate(tasks: list[dict]) -> list[str]:
                 problems.append(f"WARN  {name}: in-progress with no `last_modified_by`")
 
         if t["status"] == "done":
-            problems.append(f"WARN  {name}: status done but still in tasks/ - move to tasks/archive/")
+            problems.append(f"WARN  {name}: status done but still in tasks/ - move it to tasks/done/")
 
     active = [t for t in tasks if t["status"] == "in-progress"]
     if len(active) > MAX_IN_PROGRESS:
@@ -315,8 +315,8 @@ def main() -> int:
         return 2
 
     tasks = load_tasks(root)
-    archive = root / "tasks" / "archive"
-    archived = len(list(archive.glob("*.md"))) if archive.is_dir() else 0
+    done_dir = root / "tasks" / "done"
+    archived = len(list(done_dir.glob("*.md"))) if done_dir.is_dir() else 0
 
     problems = validate(tasks)
     errors = [p for p in problems if p.startswith("ERROR")]
@@ -342,7 +342,7 @@ def main() -> int:
         print(f"stele: {index} already current")
 
     active = sum(1 for t in tasks if t["status"] == "in-progress")
-    print(f"stele: {len(tasks)} live task(s), {active} in-progress, {archived} archived")
+    print(f"stele: {len(tasks)} live task(s), {active} in-progress, {archived} done")
     if problems:
         print(
             f"stele: {len(errors)} error(s), {len(problems) - len(errors)} warning(s) above - "

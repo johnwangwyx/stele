@@ -15,7 +15,7 @@ stele/
   TASKS.md              generated census - never edit by hand
   tasks/
     0007-slug.md        one live task per file, flat, stable path
-    archive/            closed tasks, compacted on close
+    done/               closed tasks, compacted on close
 ```
 
 ## 1. Bootstrap
@@ -23,10 +23,13 @@ stele/
 Two independent checks, both cheap. Run them at the start of any session in a project you have
 not already checked this session.
 
-**1.1 Does `./stele/` exist?** If not, create `stele/tasks/archive/`, then
+**1.1 Does `./stele/` exist?** If not, create `stele/tasks/done/`, then
 `stele/PROJECT_CONTEXT.md` from [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) -
-filling in what you can infer from the repo and leaving the rest blank rather than guessing.
-Do not create `TASKS.md`; it is generated (§6). Then continue with the user's actual request.
+filling in what you can infer from the repo and leaving the rest blank rather than guessing. Its
+sections are defaults, not a fixed schema: keep Summary, Invariants and Guardrails, drop what does
+not apply, and add whatever this project actually needs — a glossary for a domain-heavy codebase, a
+runbook pointer, an escalation path. Do not create `TASKS.md`; it is generated (§6). Then continue
+with the user's actual request.
 
 **1.2 Is the pointer block present?** Check independently of 1.1 - a project can have `stele/`
 and have lost its pointer, through a rollback, a manual edit, or a harness config added later.
@@ -59,8 +62,8 @@ Durable task state lives in `stele/`. Read it before anything else - including b
 instruction, which may already be half-done.
 
 1. Find the active task:
-   `grep -rlE --exclude-dir=archive '^status: *"?in-progress' stele/tasks/ 2>/dev/null`
-   No output means nothing is active. Do not read `stele/tasks/archive/`.
+   `grep -rlE --exclude-dir=done '^status: *"?in-progress' stele/tasks/ 2>/dev/null`
+   No output means nothing is active. Do not read `stele/tasks/done/`.
 2. Read `stele/PROJECT_CONTEXT.md`, then `stele/TASKS.md`, then the active task file.
 3. In the active task find the step marked `[open]` and reconcile it against reality:
    - Diff the step's `files:` against its `anchor:` commit. Unchanged means the step was
@@ -88,14 +91,14 @@ Never delete entries under `## Attempts/Pitfalls`. Never hand-edit `stele/TASKS.
 
 Run before editing anything, even given a direct instruction - it may already be half-done.
 
-**Locate.** `grep -rlE --exclude-dir=archive '^status: *"?in-progress' stele/tasks/ 2>/dev/null`.
+**Locate.** `grep -rlE --exclude-dir=done '^status: *"?in-progress' stele/tasks/ 2>/dev/null`.
 No output means no active task. Frontmatter always wins over `TASKS.md`, which is generated and
 can be stale.
 
 **P - Project.** Read `stele/PROJECT_CONTEXT.md`. `## Invariants` is fact - note its
 `Last verified` date. `## Current state` is recent but checkable.
 
-**A - Actions.** Read `stele/TASKS.md`. Never read `tasks/archive/` during a resume.
+**A - Actions.** Read `stele/TASKS.md`. Never read `tasks/done/` during a resume.
 
 **S - Situation.** Read only the active task file(s), and reconcile the open step per the table
 below.
@@ -138,6 +141,23 @@ Nothing active: complete PASS anyway, then ask what to work on. Do not silently 
 
 Full task skeleton: [templates/task.md](templates/task.md). A filled-in example with the project
 context that goes with it: [examples/stele/](examples/stele/).
+
+### When to create, update, and close
+
+Three hard triggers. Skipping the last one is the most likely failure in practice — a `tasks/`
+directory that only ever grows.
+
+**Create a task** before the first step of any work that will outlive this session: more than one
+sitting, more than a couple of files, or anything another agent might have to finish. A throwaway
+single-session edit does not need one. Allocate the id from the highest in `tasks/` and
+`tasks/done/`.
+
+**Update the task** whenever you open or close a step, learn something that changes the plan, or
+make a decision. Every write sets `updated_at` and `last_modified_by`. A stale `updated_at` on live
+work makes the task look abandoned, and the next agent will adopt it out from under you.
+
+**Close the task before you tell the user the work is done** — not afterwards, not next session. If
+you are about to report completion and the task is still `in-progress`, you have skipped a step.
 
 ### Open a step before acting
 
@@ -184,16 +204,16 @@ next agent inherits a hypothesis as ground truth.
 1. Close any open step.
 2. Compact: keep goal, outcome, decisions, and `Attempts/Pitfalls`. Delete the play-by-play.
 3. Promote anything binding future work to `PROJECT_CONTEXT.md` `## Decisions`, and any pitfall
-   worth keeping to its `## Invariants` - archived tasks are not read on resume, so a lesson left
-   only in an archived file is lost.
-4. `git mv stele/tasks/0007-slug.md stele/tasks/archive/`
+   worth keeping to its `## Invariants` or `## Guardrails` - closed tasks are not read on resume,
+   so a lesson left only in `tasks/done/` is lost.
+4. `git mv stele/tasks/0007-slug.md stele/tasks/done/`
 5. Regenerate the census (§6).
 
 ### Commit it
 
 `stele/` is worthless on another machine if it never leaves this one. Commit it with the work it
 describes, or on its own when a session ends. Task ids are allocated from the highest id in
-`tasks/` **and** `tasks/archive/` - the only time archive is read.
+`tasks/` **and** `tasks/done/` - the only time closed tasks are read.
 
 ## 4. Asking the human
 
@@ -232,7 +252,7 @@ Not checked - conventions you have to hold yourself:
   unsafe at two agents, and nothing can detect that for you.
 - No secrets, tokens, internal hostnames, or customer data. This directory gets committed.
 - Task paths stay stable; status lives in frontmatter, never in directory names. The only move is
-  into `archive/` on close.
+  into `done/` on close.
 - Size budgets, below.
 
 ## 6. Regenerating the census
@@ -260,7 +280,7 @@ Exceeding these makes the system cost more than it saves.
 |---|---|
 | `PROJECT_CONTEXT.md` | ~150 lines |
 | `TASKS.md` | ~4 lines per active task, 1 per other |
-| task file | ~200 lines; roll old steps into `## Log (archived)` |
+| task file | ~200 lines; roll old steps into `## Log (older steps)` |
 | session read | `PROJECT_CONTEXT` + `TASKS` + active task files only |
 
 A single-session throwaway task does not need a task file. Use stele when work will outlive the

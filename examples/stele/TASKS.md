@@ -25,4 +25,4 @@ _none_
 
 ---
 
-0 archived. Do not read `tasks/archive/` during a resume - search it only when hunting specific history.
+1 done. Do not read `tasks/done/` during a resume - search it only when hunting specific history.

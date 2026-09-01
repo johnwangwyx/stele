@@ -32,14 +32,21 @@ your-project/
     TASKS.md             generated census - never edited by hand
     tasks/
       0007-cursor-pagination.md
-      archive/           closed tasks, compacted on close
+      done/              closed tasks, compacted on close
 ```
 
 Markdown in your repo. No database, no daemon, no service, no vendor, nothing copied in that has
 to stay in sync with anything. `grep` works. `git log` works. It outlives your tooling.
 
-See [`examples/stele/`](examples/stele/) for a complete, realistic instance — a project context and
-the half-finished task that goes with it, exactly as a fresh agent would find them.
+See [`examples/stele/`](examples/stele/) for a complete, realistic instance — a project context, a
+half-finished task, and the closed task whose decisions were promoted into the project context on
+close, exactly as a fresh agent would find them.
+
+`PROJECT_CONTEXT.md` holds a **Summary** (what this is for, who consumes it), **Invariants** (the
+checks that gate CI, prerequisites, layout, conventions, how work lands), **Guardrails** (what not
+to touch, what not to run), and then the volatile parts — current state, decisions, deferred
+defects. Its sections are defaults, not a schema; add what your project needs. The test for
+including anything: if `ls`, `git log`, or a config file answers it, leave it out.
 
 ## Quick start
 
