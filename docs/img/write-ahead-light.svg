@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="190" viewBox="0 0 720 190"
+         font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img"
+         aria-label="Two sessions interrupted at the same moment. Writing the record at exit leaves the disk empty and nothing to resume from. Writing it as the work happens leaves five saved points, so the next session resumes.">
+      <rect width="720" height="190" fill="#fcfcfb"/>
+      <defs>
+        <marker id="arw" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0 1 L7 4 L0 7 Z" fill="#2a78d6"/>
+        </marker>
+      </defs>
+
+      <!-- ══ lane A : write at exit ══ -->
+      <text x="104" y="53" text-anchor="end" font-size="13.5" font-weight="600" fill="#0b0b0b">handoff at exit</text>
+
+      <rect x="124" y="42" width="300" height="12" rx="6" fill="#2a78d6"/>
+      <rect x="446" y="42" width="176" height="12" rx="6" fill="#cde2fb"/>
+
+      <text x="104" y="86" text-anchor="end" font-size="12.5" fill="#898781">disk</text>
+      <line x1="124" y1="82" x2="622" y2="82" stroke="#e1e0d9" stroke-width="1.5" stroke-dasharray="3 5"/>
+
+      <g transform="translate(660 76)">
+        <circle r="9" cx="0" cy="0" fill="none" stroke="#d03b3b" stroke-width="1.75"/>
+        <path d="M-4.2 -4.2 L4.2 4.2 M4.2 -4.2 L-4.2 4.2" stroke="#d03b3b" stroke-width="1.75" stroke-linecap="round"/>
+      </g>
+
+      <!-- ══ lane B : write as you go ══ -->
+      <text x="104" y="143" text-anchor="end" font-size="13.5" font-weight="600" fill="#0b0b0b">stele</text>
+
+      <rect x="124" y="132" width="300" height="12" rx="6" fill="#2a78d6"/>
+      <g fill="#fcfcfb">
+        <rect x="180" y="132" width="2.5" height="12"/>
+        <rect x="238" y="132" width="2.5" height="12"/>
+        <rect x="296" y="132" width="2.5" height="12"/>
+        <rect x="354" y="132" width="2.5" height="12"/>
+      </g>
+      <rect x="446" y="132" width="176" height="12" rx="6" fill="#cde2fb"/>
+
+      <text x="104" y="176" text-anchor="end" font-size="12.5" fill="#898781">disk</text>
+      <line x1="124" y1="172" x2="622" y2="172" stroke="#e1e0d9" stroke-width="1.5"/>
+
+      <!-- droplines: each write lands -->
+      <g stroke="#9ec5f4" stroke-width="1.25">
+        <line x1="131" y1="146" x2="131" y2="166"/>
+        <line x1="181" y1="146" x2="181" y2="166"/>
+        <line x1="239" y1="146" x2="239" y2="166"/>
+        <line x1="297" y1="146" x2="297" y2="166"/>
+        <line x1="355" y1="146" x2="355" y2="166"/>
+      </g>
+      <g fill="#2a78d6">
+        <rect x="127" y="166" width="8" height="8" rx="2"/>
+        <rect x="177" y="166" width="8" height="8" rx="2"/>
+        <rect x="235" y="166" width="8" height="8" rx="2"/>
+        <rect x="293" y="166" width="8" height="8" rx="2"/>
+        <rect x="351" y="166" width="8" height="8" rx="2"/>
+      </g>
+      <!-- the payoff: the next session picks up from the last saved point -->
+      <path d="M363 172 L478 172 L478 148" fill="none" stroke="#2a78d6" stroke-width="1.5" marker-end="url(#arw)"/>
+
+      <g transform="translate(660 166)">
+        <circle r="9" cx="0" cy="0" fill="none" stroke="#0ca30c" stroke-width="1.75"/>
+        <path d="M-4.4 0.2 L-1.2 3.6 L4.6 -3.4" fill="none" stroke="#0ca30c" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <!-- ══ the shared interruption ══ -->
+      <line x1="435" y1="28" x2="435" y2="184" stroke="#d03b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <circle cx="435" cy="48" r="7.5" fill="#d03b3b"/>
+      <path d="M432 45 L438 51 M438 45 L432 51" stroke="#fcfcfb" stroke-width="1.7" stroke-linecap="round"/>
+      <circle cx="435" cy="138" r="7.5" fill="#d03b3b"/>
+      <path d="M432 135 L438 141 M438 135 L432 141" stroke="#fcfcfb" stroke-width="1.7" stroke-linecap="round"/>
+      <text x="435" y="22" text-anchor="middle" font-size="12" fill="#d03b3b">rate limit</text>
+    </svg>

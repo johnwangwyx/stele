@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="176" viewBox="0 0 940 176"
+         font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img"
+         aria-label="One task across two sessions in different harnesses, both running stele. Each write lands on disk before the work it describes, building up a write-ahead context. A rate limit interrupts the first session with a step still open. The second session reads that context, reconciles what was half-applied against the recorded commit, and carries on.">
+
+      <!-- ═══ sessions ═══ -->
+      <text x="18" y="26" font-size="12.5" font-weight="600" fill="#0b0b0b">Claude Code (with stele)</text>
+      <rect x="18" y="34" width="452" height="13" rx="6.5" fill="#2a78d6"/>
+
+      <text x="524" y="26" font-size="12.5" font-weight="600" fill="#0b0b0b">Codex (with stele)</text>
+      <rect x="524" y="34" width="398" height="13" rx="6.5" fill="#2a78d6"/>
+
+      <!-- ═══ the break ═══ -->
+      <line x1="497" y1="16" x2="497" y2="140" stroke="#d03b3b" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <circle cx="497" cy="40" r="8" fill="#d03b3b"/>
+      <path d="M493.6 36.6 L500.4 43.4 M500.4 36.6 L493.6 43.4" stroke="#fcfcfb" stroke-width="1.8" stroke-linecap="round"/>
+      <text x="497" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#d03b3b">rate limit — step still open</text>
+
+      <!-- ═══ disk ═══ -->
+      <text x="18" y="110" font-size="11" font-weight="600" fill="#0b0b0b">write-ahead-context</text>
+      <line x1="18" y1="118" x2="922" y2="118" stroke="#e1e0d9" stroke-width="1.5"/>
+
+      <!-- writes from session 1 -->
+      <g stroke="#9ec5f4" stroke-width="1.25">
+        <line x1="144" y1="49" x2="144" y2="112"/>
+        <line x1="279" y1="49" x2="279" y2="112"/>
+        <line x1="414" y1="49" x2="414" y2="112"/>
+      </g>
+      <g fill="#2a78d6">
+        <rect x="140" y="112" width="9" height="9" rx="2"/>
+        <rect x="275" y="112" width="9" height="9" rx="2"/>
+        <rect x="410" y="112" width="9" height="9" rx="2"/>
+      </g>
+
+      <!-- what each write records -->
+
+      <!-- read from session 2 -->
+      <line x1="566" y1="112" x2="566" y2="55" stroke="#2a78d6" stroke-width="1.5"/>
+      <path d="M566 47 L570.8 56 L561.2 56 Z" fill="#2a78d6"/>
+      <rect x="561.5" y="112" width="9" height="9" rx="2" fill="none" stroke="#2a78d6" stroke-width="1.5"/>
+
+      <!-- write from session 2 -->
+      <line x1="760" y1="49" x2="760" y2="112" stroke="#9ec5f4" stroke-width="1.25"/>
+      <rect x="756" y="112" width="9" height="9" rx="2" fill="#2a78d6"/>
+</svg>

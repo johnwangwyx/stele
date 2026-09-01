@@ -15,7 +15,7 @@ stele/
   TASKS.md              generated census - never edit by hand
   tasks/
     0007-slug.md        one live task per file, flat, stable path
-    done/               closed tasks, compacted on close
+    done/               closed tasks, kept whole
 ```
 
 ## 1. Bootstrap
@@ -209,11 +209,16 @@ keeps it invisible to everyone else until the task ends.
 
 ### Close a task
 
-1. Close any open step.
-2. Compact: keep goal, outcome and `Attempts/Pitfalls`. Delete the play-by-play.
-3. Check nothing still needs promoting - closed tasks are not read on resume, so a lesson left
+1. Close any open step, and rewrite `## State` to describe where the work ended up.
+2. Check nothing still needs promoting - closed tasks are not read on resume, so a lesson left
    only in `tasks/done/` is lost.
-4. `git mv stele/tasks/0007-slug.md stele/tasks/done/`, then regenerate the census (§6).
+3. Set `status: done`, `git mv stele/tasks/0007-slug.md stele/tasks/done/`, then regenerate the
+   census (§6).
+
+A closed task keeps exactly the shape it had - same sections, every step `[done]` with its
+`outcome:`. Do not compact it or delete the step log. That log is the evidence of what was
+actually done; it costs nothing, because closed tasks are not read during a resume; and anyone who
+does open one later wants precisely the detail a summary would have thrown away.
 
 ### Commit it
 

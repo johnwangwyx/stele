@@ -8,15 +8,6 @@ Usage:
     python3 index.py                          regenerate, finding stele/ upward from cwd
     python3 index.py --root ./stele           point at a stele/ directory explicitly
     python3 index.py --root ./stele --check    exit 1 on drift or a broken invariant
-
-Exit codes: the regenerate path exits 0 when it wrote successfully, reporting problems as
-text. `--check` is the gate that exits non-zero - use it in CI.
-
-Deliberately small. It reads six frontmatter fields and counts step headings marked
-[open]; nothing else about a task file is parsed, so nothing else can break it.
-
-An accelerator, not a dependency: an agent that cannot locate this script maintains
-TASKS.md by hand from the shape documented in SKILL.md.
 """
 
 from __future__ import annotations
@@ -45,10 +36,6 @@ SECTIONS = [
     ("blocked", "Blocked"),
     ("paused", "Paused"),
 ]
-
-
-# --------------------------------------------------------------------------- io
-
 
 def find_root(explicit: str | None) -> Path | None:
     """Locate the stele/ directory: explicit path, or walk up from cwd."""
@@ -105,9 +92,6 @@ def load(directory: Path) -> list[dict]:
     return [parse(p) for p in sorted(directory.glob("*.md"))]
 
 
-# ---------------------------------------------------------------------- render
-
-
 def render(live: list[dict], done: list[dict]) -> str:
     out = [HEADER, "", "# Tasks", ""]
 
@@ -145,9 +129,6 @@ def render(live: list[dict], done: list[dict]) -> str:
         "has been done without reading it.",
     ]
     return "\n".join(out).rstrip() + "\n"
-
-
-# -------------------------------------------------------------------- validate
 
 
 def validate(live: list[dict], done: list[dict]) -> list[str]:
@@ -200,9 +181,6 @@ def validate(live: list[dict], done: list[dict]) -> list[str]:
             f"ERROR {active} tasks in-progress (max {MAX_IN_PROGRESS}). Park one with status: paused."
         )
     return problems
-
-
-# ------------------------------------------------------------------------ main
 
 
 def main() -> int:

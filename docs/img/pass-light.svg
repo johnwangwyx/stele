@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="256" viewBox="0 0 760 256"
+         font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img"
+         aria-label="A mapping between the clinical I-PASS handoff protocol and stele. Patient summary maps to PROJECT_CONTEXT.md, action list to TASKS.md, situation awareness to the open step, and synthesis by the receiver - echoing the situation back - to reading the record back, confirming it against the anchor commit and the human, then continuing.">
+
+      <text x="310" y="26" text-anchor="end" font-size="12.5" font-weight="600" fill="#0b0b0b">Clinical Handoff</text>
+      <text x="390" y="26" font-size="12.5" font-weight="600" fill="#0b0b0b">stele</text>
+      <line x1="18" y1="40" x2="742" y2="40" stroke="#e1e0d9" stroke-width="1"/>
+
+      <circle cx="350" cy="76" r="16" fill="#2a78d6"/>
+      <text x="350" y="82" text-anchor="middle" font-size="15" font-weight="600" fill="#fcfcfb">P</text>
+      <line x1="318" y1="76" x2="332" y2="76" stroke="#9ec5f4" stroke-width="1.5"/>
+      <line x1="368" y1="76" x2="382" y2="76" stroke="#9ec5f4" stroke-width="1.5"/>
+      <text x="310" y="81" text-anchor="end" font-size="13.5" fill="#0b0b0b">patient summary</text>
+      <text x="390" y="81" font-size="13.5" font-weight="600" fill="#0b0b0b">PROJECT_CONTEXT.md</text>
+
+      <circle cx="350" cy="128" r="16" fill="#2a78d6"/>
+      <text x="350" y="134" text-anchor="middle" font-size="15" font-weight="600" fill="#fcfcfb">A</text>
+      <line x1="318" y1="128" x2="332" y2="128" stroke="#9ec5f4" stroke-width="1.5"/>
+      <line x1="368" y1="128" x2="382" y2="128" stroke="#9ec5f4" stroke-width="1.5"/>
+      <text x="310" y="133" text-anchor="end" font-size="13.5" fill="#0b0b0b">action list</text>
+      <text x="390" y="133" font-size="13.5" font-weight="600" fill="#0b0b0b">TASKS.md</text>
+
+      <circle cx="350" cy="180" r="16" fill="#2a78d6"/>
+      <text x="350" y="186" text-anchor="middle" font-size="15" font-weight="600" fill="#fcfcfb">S</text>
+      <line x1="318" y1="180" x2="332" y2="180" stroke="#9ec5f4" stroke-width="1.5"/>
+      <line x1="368" y1="180" x2="382" y2="180" stroke="#9ec5f4" stroke-width="1.5"/>
+      <text x="310" y="185" text-anchor="end" font-size="13.5" fill="#0b0b0b">situation awareness</text>
+      <text x="390" y="185" font-size="13.5" font-weight="600" fill="#0b0b0b">the open step</text>
+
+      <circle cx="350" cy="232" r="16" fill="#2a78d6"/>
+      <text x="350" y="238" text-anchor="middle" font-size="15" font-weight="600" fill="#fcfcfb">S</text>
+      <line x1="318" y1="232" x2="332" y2="232" stroke="#9ec5f4" stroke-width="1.5"/>
+      <line x1="368" y1="232" x2="382" y2="232" stroke="#9ec5f4" stroke-width="1.5"/>
+      <text x="310" y="237" text-anchor="end" font-size="13.5" fill="#0b0b0b">synthesis (echo back) by receiver</text>
+      <text x="390" y="237" font-size="13.5" font-weight="600" fill="#0b0b0b">read it back, confirm, then continue</text>
+</svg>
