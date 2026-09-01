@@ -25,11 +25,12 @@ not already checked this session.
 
 **1.1 Does `./stele/` exist?** If not, create `stele/tasks/done/`, then
 `stele/PROJECT_CONTEXT.md` from [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) -
-filling in what you can infer from the repo and leaving the rest blank rather than guessing. Its
-sections are defaults, not a fixed schema: keep Summary, Invariants and Guardrails, drop what does
-not apply, and add whatever this project actually needs — a glossary for a domain-heavy codebase, a
-runbook pointer, an escalation path. Do not create `TASKS.md`; it is generated (§6). Then continue
-with the user's actual request.
+filling in what you can infer from the repo. Leave a field blank rather than guessing, leave
+Guardrails / Decisions / Deferred as `None` until there is something real to put in them, and if
+`ls`, `git log`, or a config file already answers it, leave it out. Its sections are defaults, not a
+fixed schema: keep Summary, Invariants and Guardrails, drop what does not apply, and add whatever
+this project needs — a glossary for a domain-heavy codebase, a runbook pointer, an escalation path.
+Do not create `TASKS.md`; it is generated (§6). Then continue with the user's actual request.
 
 **1.2 Is the pointer block present?** Check independently of 1.1 - a project can have `stele/`
 and have lost its pointer, through a rollback, a manual edit, or a harness config added later.
