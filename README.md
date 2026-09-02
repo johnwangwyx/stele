@@ -71,6 +71,14 @@ On resume, the next agent reads the project context, the generated task index, a
 
 See [`examples/stele/`](examples/stele/) for a complete, realistic instance.
 
+### Worth having even if nothing ever crashes
+
+Interruption is the reason to install it. What you actually get is a project tracker that nobody had to maintain.
+
+Because the record is written as a condition of doing the work, `tasks/done/` accumulates into a history without anyone deciding to keep one: what was attempted, what was rejected and why, what each step was verified against. Decisions collect in one place, each traceable to the task that produced it. Six months later, *"why didn't we do X?"* has an answer on disk rather than in whoever still remembers — and it is answered by the record of the attempt, not a reconstruction of it.
+
+That history is a side effect of the mechanism, which is the only reason it stays accurate. Documentation written to be documentation goes stale; this is written because the next step depends on it.
+
 <details open>
 <summary><strong>Reliability details</strong></summary>
 
@@ -91,6 +99,23 @@ See [`examples/stele/`](examples/stele/) for a complete, realistic instance.
 </picture>
 
 **[I-PASS](https://www.ahrq.gov/teamstepps-program/curriculum/communication/tools/ipass.html)** is a structured clinical handoff protocol. It addresses the same fundamental risk: the outgoing participant holds context that the incoming participant cannot know is missing. stele adapts that idea to interrupted coding-agent work.
+
+</details>
+
+<details open>
+<summary><strong>What context it puts in your repository</strong></summary>
+
+all plain markdown, all committed with the code they describe.
+
+```
+stele/
+  PROJECT_CONTEXT.md      standing facts - checks, guardrails, decisions
+  TASKS.md                generated index - never edited manually
+  tasks/
+    0007-cursor-pagination.md    one live task (as example)
+    done/
+      0005-choose-pagination-strategy.md    closed, kept whole
+```
 
 </details>
 
