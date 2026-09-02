@@ -9,25 +9,11 @@
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-eda100"></a>
 </p>
 
-**Crash-proof task memory for coding agents.** Claude hit its usage limit halfway through a refactor? Resume the same task in Codex, Cursor, or a fresh session without reconstructing anything.
+**Write-ahead task memory for coding agents.** Hit a usage limit, crash, or switch harnesses—then resume the same work without saving a handoff or reconstructing context.
 
-### Most agent memory is write-after. stele is write-ahead.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/img/lifecycle-dark.svg">
-  <img alt="One task across two sessions, both running stele. Three writes land on disk before the work they describe: opening step 2, closing it, opening step 3. A rate limit interrupts with step 3 still open. A second session in a different harness resumes, reads the open step to see what was half-applied, and finishes and closes it." src="docs/img/lifecycle-light.svg" width="100%">
-</picture>
-
-Everything else writes the record last: a handoff skill at the end of a session, a summary before you close the laptop, a memory file updated once the work is done. That holds right up until the session ends without you — a usage limit, a crash, a closed laptop — and then there is nothing at all.
-
-stele writes each step *before* the work it describes. So the record does not depend on the session surviving long enough to write it.
-
-| | Rate limit / crash | Context compaction | Knows what was half-done | Remembers failed attempts | Never stale |
-|---|:--:|:--:|:--:|:--:|:--:|
-| Handoff skills, `/handoff` | ❌ | ❌ | ⚠️ | ⚠️ | ✅ |
-| Memory banks, `CLAUDE.md` notes | ⚠️ | ⚠️ | ❌ | ⚠️ | ❌ |
-| Planning files | ✅ | ✅ | ❌ | ❌ | ⚠️ |
-| **stele** | ✅ | ✅ | ✅ | ✅ | ✅ |
+<p align="center">
+  <img alt="An interrupted coding-agent task resumed in another harness with stele" src="docs/img/stele-demo.gif" width="100%">
+</p>
 
 ## Install
 
@@ -37,73 +23,76 @@ npx skills@latest add johnwangwyx/stele --global
 
 This installs stele into the harnesses it detects on your machine, for all your projects.
 
-## To use
+## Use
 
 ### 1. Start managing a project
 
-> `/stele` manage this project with stele
+> `/stele` manage this project
 
-<sub>`/` is Claude Code — Codex uses `$stele`, and other harnesses have their own way to start conversation while mentioning a skill.</sub>
-
-New project, same sentence. On an existing repo the skill reads what is already there.
+New project, same sentence. On an existing repo, the skill reads what is already there.
 
 ### 2. Now it is interruptible
 
-> *(nothing to type — that is the point)*
+> *(nothing to type—that is the point)*
 
-Hit a usage limit, crash, close the laptop, switch provider, come back in three weeks. The record is already on disk, because every write happened *before* the work it describes rather than after it. Nothing needs saving on the way out.
+Hit a usage limit, crash, close the laptop, switch harnesses, or come back in three weeks. The record is already on disk because every write happened before the work it describes. Nothing needs saving on the way out.
 
-### 3. Resume, in any harness
+### 3. Resume in any harness
 
-> `/stele` resume where it is left off
+> `/stele` resume where it left off
 
-Note: You will mostly not even need the skill trigger (`/stele` or `$stele`). That first run left a pointer in `AGENTS.md` (creating it if there was none), so the next agent or harness knows to load stele.
+You will often not need to trigger the skill explicitly. The first run leaves a pointer in `AGENTS.md` so the next agent or harness knows to load stele.
 
 ## How it works
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/lifecycle-dark.svg">
+  <img alt="A task starts in one session, is interrupted with an open step, and resumes in another session from the state stele already wrote to disk." src="docs/img/lifecycle-light.svg" width="100%">
+</picture>
+
+Most agent memory is write-after: it records a handoff or summary at the end of a session. That works until the session ends unexpectedly and never gets the chance.
+
+stele writes each step *before* the work it describes. The record does not depend on the session surviving long enough to write it.
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/hierarchy-dark.svg">
-  <img alt="Three nested levels. A project box holds PROJECT_CONTEXT.md with the checks, guardrails and decisions, and lives as long as the code. Inside it, task boxes each hold one unit of work with its goal, state and attempts, and outlive a single session. Inside the active task, two step boxes each cover one sitting; the step is the level written before the work happens. Closed tasks move to tasks/done and are kept whole." src="docs/img/hierarchy-light.svg" width="100%">
+  <img alt="A project contains durable context, tasks contain goals and state, and steps record the next action before work begins." src="docs/img/hierarchy-light.svg" width="100%">
 </picture>
 
 Three levels, and nothing else:
 
-**Project** — the standing facts an agent cannot cheaply derive and would otherwise get wrong: how to build and test, what not to touch, what not to run, the decisions that already bind future work.
+**Project** — build and test commands, invariants, and decisions that future agents should not have to rediscover.
 
-**Task** — one unit of work that will outlive a single session. Its goal, how you would know it is finished, its current state in a few lines, and an append-only record of what was already tried and failed. That last part is the most expensive thing to lose.
+**Task** — one unit of work, its goal, current state, and the failed attempts another agent should not repeat.
 
-**Step** — a slice of a task small enough to sit inside one sitting. This is where write-ahead happens: before touching anything, the agent records what it is about to do and which files it will touch. Afterwards it records the outcome.
+**Step** — the next action and affected files, recorded before work begins and closed only after verification.
 
-That order is what makes a cold resume work. The next agent reads the project context, then the auto-generated `TASKS.md`, then the open step of whatever is still in progress. From that it can see for itself whether the work finished or stopped halfway and the touched files. Nobody has to explain anything.
-
-The record is always one step ahead of the work. So when a session dies, everything is already saved.
-
-### What makes it reliable
-
-- **Each task file lists the tools and skills its plan assumed.** A `requires:` field captures them — so an agent in a harness that lacks one can say so, reach for the documented substitute, or ask, instead of finding the gap by watching something fail.
-- **The task list is generated, never hand-written.** `TASKS.md` — the index in the diagram above — is rendered from the individual task files on each resume, so it is always up-to-date.
-- **A step is only marked done once its check has actually run.** If a task could not be executed — no permission, a missing dependency, the wrong environment — the step stays open with attempts tracked.
-- **Each task file keeps an append-only record of what was already tried and failed.** Nothing gets deleted from it. That is the most expensive thing to lose, because the next agent is drawn to the same dead end and pays full price for it a second time.
-- **A decision that affects future work is promoted the moment it is made**, not when the task closes. Otherwise it sits invisible in one task file while other agents carry on without it.
-
-### What you get as a side effect
-
-Worth having even on a project that never gets interrupted, and the last two are for people rather than agents.
-
-- **A project history nobody had to write.** 
-- **Decisions collect into a log, each traceable to the task that produced it.**
-- **"Why didn't we do X?" has an answer on disk.** 
+On resume, the next agent reads the project context, the generated task index, and the open step. It can inspect what is on disk, determine where the interruption happened, and continue without an explanation from the previous session.
 
 See [`examples/stele/`](examples/stele/) for a complete, realistic instance.
 
-## Where the protocol comes from
+<details open>
+<summary><strong>Reliability details</strong></summary>
+
+- Each task records the tools and skills its plan assumed, so a different harness can identify missing capabilities before acting.
+- `TASKS.md` is generated from individual task files on every resume rather than maintained by hand.
+- A step is marked done only after its check has run successfully.
+- Failed attempts remain append-only so the next agent does not pay for the same dead end twice.
+- Decisions that affect future work are promoted when they are made, not when the task closes.
+
+</details>
+
+<details open>
+<summary><strong>Where the protocol comes from</strong></summary>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/pass-dark.svg">
-  <img alt="A mapping between the clinical I-PASS handoff protocol and stele. Patient summary maps to PROJECT_CONTEXT.md, action list to TASKS.md, situation awareness to the open step, and synthesis by the receiver — echoing the situation back — to reading the record back, confirming it, then continuing." src="docs/img/pass-light.svg" width="100%">
+  <img alt="A mapping between the clinical I-PASS handoff protocol and stele's project, task, step, and resume flow." src="docs/img/pass-light.svg" width="100%">
 </picture>
 
-**[I-PASS](https://www.ahrq.gov/teamstepps-program/curriculum/communication/tools/ipass.html)** is the shift-change handover protocol hospitals adopted once transitions proved to be where patients come to harm. The departing clinician holds context that never reached the charts or reports, and the arriving one cannot know what is missing. **It is an example of an evidence-based option for conducting a structured handoff.**
+**[I-PASS](https://www.ahrq.gov/teamstepps-program/curriculum/communication/tools/ipass.html)** is a structured clinical handoff protocol. It addresses the same fundamental risk: the outgoing participant holds context that the incoming participant cannot know is missing. stele adapts that idea to interrupted coding-agent work.
+
+</details>
 
 ## License
 
