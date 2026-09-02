@@ -9,7 +9,7 @@
   <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-eda100"></a>
 </p>
 
-**Write-ahead task memory for coding agents.** Hit a usage limit, crash, or switch harnesses—then resume the same work without saving a handoff or reconstructing context.
+**Write-ahead task memory and project tracking for coding agents.** Hit a usage limit, crash, or switch harnesses—then resume the same work without saving a handoff or reconstructing context. The record that makes that possible is also the project history you never got round to writing.
 
 <p align="center">
   <img alt="An interrupted coding-agent task resumed in another harness with stele" src="docs/img/stele-demo.gif" width="100%">
@@ -29,7 +29,7 @@ This installs stele into the harnesses it detects on your machine, for all your 
 
 > `/stele` manage this project
 
-New project, same sentence. On an existing repo, the skill reads what is already there.
+New project or an existing repo, same sentence. From here the work is tracked whether or not anything ever interrupts it: what each task is for, what was tried, what was rejected, what are the decisions, and what every step was checked against.
 
 ### 2. Now it is interruptible
 
