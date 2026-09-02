@@ -1,6 +1,6 @@
 ---
 name: stele
-description: Durable project and task state as a skill, so any coding agent can resume work another agent started. Use at session start, when resuming after a break, crash, rate limit, or context compaction, when switching agents or harnesses (Claude Code, Codex, Cursor, Gemini CLI, Kiro, Copilot), when the user says "continue where we left off" / "pick up where I stopped" / "what was I working on", and before and after any substantial piece of work so the next session can continue it without being told anything. Install the skill once; it then sets itself up in each project the first time it runs there.
+description: Durable project and task state kept as plain markdown in the repository - a PROJECT_CONTEXT.md of standing facts, a generated TASKS.md census, and one file per task holding its goal, current state, failed attempts and steps. Every step is written before the work it describes rather than at session exit, so a session killed by a rate limit or a crash still leaves the next agent — in any harness — enough to carry on. Invoke only when stele is named — the user asks to manage(init) a project with it, asks to resume or continue where it left off, or a project instruction file points at a stele/ directory and tells you to load this skill. Otherwise do not invoke.
 ---
 
 # stele
@@ -18,11 +18,20 @@ stele/
 
 ## 1. Bootstrap
 
-Two independent checks, both cheap. Run them at the start of any session in a project you have not already checked this session.
+**1.0 Does this project want stele at all?**
 
-**1.1 Does `./stele/` exist?**
+| | |
+|---|---|
+| `stele/` exists | Managed. Confirm the pointer block (§1.2), then resume (§2). |
+| No `stele/`, and the user asked for stele to manage the project | Bootstrap it: §1.1 below. |
+| No `stele/`, and the user only asked to resume or continue | Say the record is missing - see §1.3 - then do the work they asked for without it. |
+| No `stele/`, and stele was not mentioned | Carry on with the request as though this skill were not installed. Do not create files, do not mention or offer stele. |
 
-If not, create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` from this skill's [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) - filling in what you can infer from the repo. Leave a field blank rather than guessing.
+That last row is the common one. Loading this skill is not consent to restructure someone's repository.
+
+**1.1 Bootstrap, when asked**
+
+Create `stele/tasks/done/`, then `stele/PROJECT_CONTEXT.md` from this skill's [templates/PROJECT_CONTEXT.md](templates/PROJECT_CONTEXT.md) - filling in what you can infer from the repo. Leave a field blank rather than guessing.
 
 Do not write `TASKS.md` by hand - generate it with this skill's own script, run from wherever the skill is installed:
 
@@ -32,7 +41,7 @@ python3 <your-harness-skill-dir>/stele/scripts/index.py
 
 `<your-harness-skill-dir>` is the directory your harness keeps skills in - `~/.claude/skills` for Claude Code and `~/.codex/skills` for Codex, with other harnesses using their own.
 
-**1.2 Is the pointer block present?** Check independently of 1.1
+**1.2 Is the pointer block present?**
 
 Put it in `AGENTS.md`, creating that if absent - it is the file Codex, Cursor, Copilot, Gemini CLI, opencode and Kiro read. Harnesses that read their own file get a one-line import instead of a second copy: `CLAUDE.md` containing `@AGENTS.md` for Claude Code, and the same for `GEMINI.md`, `.cursor/rules/stele.mdc` or `.kiro/steering/stele.md` where the project already uses them. One block, imported - never six copies to drift apart.
 
@@ -48,6 +57,12 @@ before doing anything else — including before a direct instruction, which may 
 If the stele skill is not installed in this harness, say so before continuing. `stele/TASKS.md` and the files under `stele/tasks/` are plain markdown and still readable, but nothing will maintain them, and the state will silently go stale.
 <!-- stele:end -->
 ```
+
+**1.3 Asked to resume, but there is no record**
+
+Tell the user plainly, in one line: there is no `stele/` here, so there is nothing to resume from. Then do what they asked using whatever the repo itself offers - git log, the code, their own description.
+
+Offer once, and only once: whether they want the project managed from now on, so the next session has something to read. If they say yes, bootstrap per §1.1 and open a task for the work. If they say no or say nothing, do not ask again this session and do not leave anything behind.
 
 ## 2. Resume: PASS
 
