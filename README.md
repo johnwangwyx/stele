@@ -21,7 +21,7 @@
 npx skills@latest add johnwangwyx/stele --global
 ```
 
-This installs stele into the harnesses it detects on your machine, for all your projects.
+This installs stele into the harnesses it detects on your machine, as an available skill.
 
 ## Use
 
